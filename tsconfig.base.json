@@ -1,0 +1,31 @@
+{
+ "compilerOptions": {
+  "target": "esnext",
+  "useDefineForClassFields": true,
+  "module": "esnext",
+  "moduleResolution": "node",
+  "strict": true,
+  "sourceMap": true,
+  "resolveJsonModule": true,
+  "esModuleInterop": true,
+  "declaration": true,
+  "skipLibCheck": false,
+  "composite": true,
+  "incremental": true
+ },
+ "references": [
+  {
+   "path": "./libs/vite",
+   "name": "@websublime/vite"
+  },
+  {
+   "path": "packages/ws-essential",
+   "name": "@websublime/ws-essential"
+  }
+ ],
+ "exclude": [
+  "**/tests/**",
+  "**/dist/**",
+  "**/.nuxt/**"
+ ]
+}

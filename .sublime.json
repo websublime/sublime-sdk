@@ -1,0 +1,18 @@
+{
+ "name": "sublime-sdk",
+ "repo": "websublime/sublime-sdk",
+ "namespace": "@websublime/sublime-sdk",
+ "root": "./",
+ "organization": "websublime",
+ "id": "af46a922-4103-4a51-a66c-5867833482ba",
+ "description": "Sublime platform packages",
+ "packages": [
+  {
+   "id": "3e4dc568-6eb5-45da-be9b-77cfeb1d6054",
+   "name": "ws-essential",
+   "scope": "@websublime",
+   "type": "pkg",
+   "description": "Global redux-kit connection"
+  }
+ ]
+}
