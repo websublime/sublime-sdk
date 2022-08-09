@@ -1,4 +1,4 @@
-import { isSsr, uniqueID, isEmpty, isNil } from './helpers';
+import { isEmpty, isNil, isSsr, uniqueID } from './helpers';
 
 describe('> Helpers', () => {
   test('Should test platform', () => {
@@ -12,7 +12,9 @@ describe('> Helpers', () => {
   });
 
   test('Should test value is empty', () => {
+    // eslint-disable-next-line unicorn/no-null
     const isNull = isEmpty(null);
+    // eslint-disable-next-line unicorn/no-useless-undefined
     const isUndefined = isEmpty(undefined);
     const isValid = isEmpty(1);
 
@@ -22,7 +24,9 @@ describe('> Helpers', () => {
   });
 
   test('Should test is null or undefined', () => {
+    // eslint-disable-next-line unicorn/no-null
     const isNull = isNil(null);
+    // eslint-disable-next-line unicorn/no-useless-undefined
     const isUndefined = isNil(undefined);
     const isNotValid = isNil(1);
 
