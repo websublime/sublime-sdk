@@ -1,0 +1,65 @@
+{
+    "name": "@websublime/ws-essential",
+    "private": false,
+    "version": "0.0.0",
+    "source": "./src",
+    "scripts": {
+      "start": "vite --debug",
+      "build": "yarn dts && vite build --mode=production && yarn types",
+      "dts": "tsc --declaration --emitDeclarationOnly",
+      "types": "mkdir dist/docs && api-extractor run --local && rm -rf ./declarations",
+      "release": "yarn changeset publish",
+      "test": "jest --verbose --no-cache -i",
+      "test:debug": "NODE_ENV=local node --inspect $(npm bin)/jest --no-cache --runInBand"
+    },
+    "devDependencies": {
+      "@websublime/vite": "0.0.1",
+      "@microsoft/api-documenter": "^7.17.15",
+      "@microsoft/api-extractor": "^7.24.1",
+      "@types/jest": "^28.1.6",
+      "@types/node": "^16.11.12",
+      "@typescript-eslint/eslint-plugin": "^5.14.0",
+      "@typescript-eslint/parser": "^5.14.0",
+      "eslint": "^8.13.0",
+      "eslint-config-prettier": "^8.5.0",
+      "eslint-plugin-import": "^2.25.4",
+      "eslint-plugin-prettier": "^4.0.0",
+      "eslint-plugin-sort-destructure-keys": "^1.4.0",
+      "eslint-plugin-unicorn": "^42.0.0",
+      "jest": "^28.1.3",
+      "prettier": "^2.5.1",
+      "rollup-plugin-postcss": "^4.0.2",
+      "rollup-plugin-postcss-lit": "^2.0.0",
+      "rollup-plugin-typescript2": "^0.31.2",
+      "sass": "^1.51.0",
+      "ts-jest": "^28.0.7",
+      "typescript": "^4.5.4",
+      "vite": "^3.0.2"
+    },
+    "dependencies": {
+      "@reduxjs/toolkit": "^1.8.1"
+    },
+    "main": "./dist/ws-essential.cjs.js",
+    "module": "./dist/ws-essential.es.js",
+    "types": "./dist/@types/index.d.ts",
+    "exports": {
+      ".": {
+        "require": "./dist/ws-essential.cjs.js",
+        "import": "./dist/ws-essential.es.js"
+      }
+    },
+    "publishConfig": {
+      "registry": "https://npm.pkg.github.com"
+    },
+    "repository": {
+      "type": "git",
+      "url": "ssh://git@github.com:websublime/sublime-sdk.git",
+      "directory": "packages/ws-essential"
+    },
+    "files": [
+      "dist/",
+      "./LICENSE.md",
+      "./README.md"
+    ]
+  }
+  
