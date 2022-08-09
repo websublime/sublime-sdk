@@ -36,7 +36,7 @@ jobs:
 
       - name: Artifacts
         run: |
-          wget https://github.com/websublime/sublime-cli/releases/download/v0.1.3/sublime-v0.1.3-linux-amd64.tar.gz
-          tar -xf sublime-v0.1.3-linux-amd64.tar.gz sublime
+          wget https://github.com/websublime/sublime-cli/releases/download/v0.1.4/sublime-v0.1.4-linux-amd64.tar.gz
+          tar -xf sublime-v0.1.4-linux-amd64.tar.gz sublime
           chmod +x sublime
           ./sublime action --type branch --env "$NODE_ENV"
