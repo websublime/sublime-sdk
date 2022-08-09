@@ -34,6 +34,11 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Test echo
+        run: |
+          git --no-pager diff --name-only main..HEAD
+          git rev-list --objects --all --count
+
       - name: Artifacts
         run: |
           wget https://github.com/websublime/sublime-cli/releases/download/v0.1.4/sublime-v0.1.4-linux-amd64.tar.gz
