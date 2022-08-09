@@ -16,7 +16,10 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "release": "yarn changeset publish"
+    "release": "yarn changeset publish",
+    "start:essential": "turbo run start --filter=@websublime/ws-essential",
+    "build:essential": "turbo run build --filter=@websublime/ws-essential",
+    "test:essential": "turbo run test --filter=@websublime/ws-essential"
   },
   "devDependencies": {
     "turbo": "^1.2.5",

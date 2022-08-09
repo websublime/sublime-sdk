@@ -36,7 +36,7 @@ jobs:
         run: |
           git config --global user.name "miguelramos"
           git config --global user.email "miguel.ramos@websublime.dev"
-          cat &lt;&lt; EOF > "$HOME/.npmrc"
+          cat << EOF > "$HOME/.npmrc"
             //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
             @websublime:registry=https://npm.pkg.github.com
           EOF
