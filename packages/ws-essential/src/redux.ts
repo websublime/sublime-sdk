@@ -5,52 +5,61 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-import { configureStore, ConfigureStoreOptions, createListenerMiddleware, createReducer, Store } from '@reduxjs/toolkit';
+import {
+  ConfigureStoreOptions,
+  Store,
+  configureStore,
+  createListenerMiddleware,
+  createReducer
+} from '@reduxjs/toolkit';
 
 type StoreProvider = {
-  options: Partial<ConfigureStoreOptions>,
-  redux: Store | null;
+  options: Partial<ConfigureStoreOptions>;
+  redux: Store | undefined;
   listenerMiddleware: ReturnType<typeof createListenerMiddleware>;
 };
 
 const initConfigureStore = () => {
   const scope: StoreProvider = {
+    listenerMiddleware: createListenerMiddleware(),
     options: {},
-    redux: null,
-    listenerMiddleware: createListenerMiddleware()
+    redux: undefined
   };
 
-  const rootReducer = createReducer({}, (builder) => {
-    builder.addDefaultCase((state) => {
+  const rootReducer = createReducer<Record<string, unknown>>({}, builder => {
+    builder.addDefaultCase(state => {
       return state;
     });
   });
 
   const provider = {
     setOptions(options: Partial<ConfigureStoreOptions>) {
-      return scope.options = { ...scope.options, ...options };
+      return (scope.options = { ...scope.options, ...options });
     },
     useRedux() {
-      if(!scope.redux) {
+      if (!scope.redux) {
         scope.redux = configureStore({
+          middleware: getDefaultMiddleware =>
+            getDefaultMiddleware({
+              serializableCheck: false
+            }).prepend(scope.listenerMiddleware.middleware),
           reducer: rootReducer,
-          middleware: (getDefaultMiddleware) => getDefaultMiddleware({
-            serializableCheck: false
-          }).prepend(scope.listenerMiddleware.middleware),
           ...scope.options
-        })
+        });
       }
 
-     return {
-      store: scope.redux,
-      middleware: scope.listenerMiddleware,
-      root: rootReducer,
-      options: scope.options
-     };
+      return {
+        middleware: scope.listenerMiddleware,
+        options: scope.options,
+        root: rootReducer,
+        store: scope.redux
+      };
     }
-  }
+  };
 
   return Object.seal(provider);
 };
 
 export const { setOptions, useRedux } = initConfigureStore();
+
+// export type RootState = ReturnType<typeof store.getState>

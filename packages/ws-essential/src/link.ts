@@ -1,41 +1,36 @@
 import { AnyAction } from '@reduxjs/toolkit';
 
-import { uniqueID } from './helpers';
 import { useRedux } from './redux';
-import { EssentialSymbol } from './types';
+import { SymbolID } from './types';
 
-export abstract class EssentialLink {
+export abstract class EssentialLink<
+  State = unknown,
+  Actions = Record<string, unknown>
+> {
+  /**
+   * Initial is the default or initial state that should be applied
+   * when creating link or to use it to restore/reset state to initial form
+   *
+   * @public
+   */
+  abstract readonly initial: State;
+
+  abstract readonly actions: Actions;
+
   /**
    * Unique namespace to identify on state tree the
    * reducer state. Be aware that this should be unique string.
    *
    * @public
    */
-  public namespace: symbol | string = Symbol(uniqueID());
+  public namespace: SymbolID;
 
-  public symbol: EssentialSymbol;
-
-  /**
-   * Redux toolkit reference
-   *
-   * @private
-   */
-  private get redux() {
-    return useRedux();
-  }
-
-  constructor(key?: symbol | string) {
-    if (key) {
-      this.namespace = key;
-    }
-
-    this.symbol = Object.seal({
-      key: this.namespace.toString()
-    });
+  constructor(key: SymbolID) {
+    this.namespace = key;
   }
 
   protected dispatch(action: AnyAction) {
-    const { store } = this.redux;
+    const { store } = useRedux();
 
     return store.dispatch(action);
   }

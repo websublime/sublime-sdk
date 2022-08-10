@@ -2,7 +2,7 @@ import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 
 import { EssentialLink } from './link';
 import { setOptions } from './redux';
-import { EssentialSymbol } from './types';
+import { Abstract, Class, SymbolID } from './types';
 
 export class EssentialStore {
   /**
@@ -12,13 +12,16 @@ export class EssentialStore {
    */
   private options: Partial<ConfigureStoreOptions>;
 
-  private links = new WeakMap<EssentialSymbol, unknown>();
+  private links = new WeakMap<
+    SymbolID,
+    InstanceType<Abstract<EssentialLink>>
+  >();
 
   constructor(options: Partial<ConfigureStoreOptions>) {
     this.options = setOptions(options);
   }
 
-  addLink<Link extends EssentialLink>(link: Link) {
-    this.links.set(link.symbol, link);
+  addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
+    this.links.set(link.namespace, link);
   }
 }
