@@ -1,27 +1,37 @@
-import { ConfigureStoreOptions } from '@reduxjs/toolkit';
+import { ConfigureStoreOptions, createReducer } from '@reduxjs/toolkit';
+import { ReducerWithInitialState } from '@reduxjs/toolkit/dist/createReducer';
 
 import { EssentialLink } from './link';
 import { setOptions } from './redux';
-import { Abstract, Class, SymbolID } from './types';
+import { Class, SymbolID } from './types';
+
+type LinkEntries = {
+  link: InstanceType<Class<EssentialLink>>;
+  reducer: ReducerWithInitialState<any>;
+};
 
 export class EssentialStore {
-  /**
-   * Redux and store options.
-   *
-   * @private
-   */
-  private options: Partial<ConfigureStoreOptions>;
-
-  private links = new WeakMap<
-    SymbolID,
-    InstanceType<Abstract<EssentialLink>>
-  >();
+  private links = new WeakMap<SymbolID, LinkEntries>();
 
   constructor(options: Partial<ConfigureStoreOptions>) {
-    this.options = setOptions(options);
+    setOptions(options);
   }
 
   addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
-    this.links.set(link.namespace, link);
+    if (!this.links.has(link.namespace)) {
+      const reducers = link.getReducers();
+
+      const reducer = createReducer(link.initial, builder => {
+        if (reducers) {
+          for (const item of reducers) {
+            builder.addCase(item.action, item.reducer);
+          }
+        }
+
+        builder.addDefaultCase(state => state);
+      });
+
+      this.links.set(link.namespace, { link, reducer });
+    }
   }
 }

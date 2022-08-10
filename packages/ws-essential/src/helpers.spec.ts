@@ -17,10 +17,12 @@ describe('> Helpers', () => {
     // eslint-disable-next-line unicorn/no-useless-undefined
     const isUndefined = isEmpty(undefined);
     const isValid = isEmpty(1);
+    const isFunction = isEmpty(() => 1);
 
     expect(isNull).toBeTruthy();
     expect(isUndefined).toBeTruthy();
     expect(isValid).toBeFalsy();
+    expect(isFunction).toBeFalsy();
   });
 
   test('Should test is null or undefined', () => {

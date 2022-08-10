@@ -1,4 +1,4 @@
-import { createAction, createReducer } from '@reduxjs/toolkit';
+import { Draft } from '@reduxjs/toolkit';
 
 import { uniqueID } from './helpers';
 import { EssentialLink } from './link';
@@ -20,24 +20,39 @@ describe('> EssentialLink', () => {
       }
 
       get actions() {
-        const increment = createAction<number | undefined>(
-          `${this.namespace.key.toString()}/INCREMENT`
-        );
+        const increment = this.createAction<number | undefined>('INCREMENT');
+        const decrement = this.createAction<number | undefined>('DECREMENT');
 
-        createReducer(this.initial, {
-          [increment.type]: (state, { payload }) =>
-            this.increment({ payload, state })
-        });
+        this.registerReducer(increment, this.increment);
+        this.registerReducer(decrement, this.decrement);
 
         return {
+          decrement,
           increment
         };
       }
 
-      increment(arguments_: { state: FooState; payload: number }) {
-        arguments_.state.count = arguments_.payload;
+      bootstrap() {
+        // eslint-disable-next-line no-console
+        console.log('BOOTSTRAP');
+      }
 
-        return arguments_.state;
+      private increment(parameters: {
+        state: Draft<FooState>;
+        payload: number;
+      }) {
+        parameters.state.count = parameters.payload;
+
+        return parameters.state;
+      }
+
+      private decrement(parameters: {
+        state: Draft<FooState>;
+        payload: number;
+      }) {
+        parameters.state.count = parameters.state.count - parameters.payload;
+
+        return parameters.state;
       }
     }
 
@@ -48,13 +63,19 @@ describe('> EssentialLink', () => {
       }
 
       get actions() {
+        const message = this.createAction<string | undefined>('MESSAGE');
+
+        this.createReducer(message, this.message);
+
         return {
-          init: () => this.initialize({})
+          message
         };
       }
 
-      initialize(options: any) {
-        return options;
+      private message(parameters: { state: Draft<BarState>; payload: string }) {
+        parameters.state.message = parameters.payload;
+
+        return parameters.state;
       }
     }
 
@@ -62,8 +83,6 @@ describe('> EssentialLink', () => {
     const barLink = new BarLink(BarLinkID);
 
     const store = new EssentialStore({ devTools: true });
-
-    fooLink.actions.increment(2);
 
     store.addLink(fooLink);
     store.addLink(barLink);
