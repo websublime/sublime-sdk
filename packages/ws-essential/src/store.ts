@@ -1,13 +1,22 @@
-import { ConfigureStoreOptions, createReducer } from '@reduxjs/toolkit';
+import {
+  ConfigureStoreOptions,
+  UnsubscribeListener,
+  combineReducers,
+  createAction,
+  createReducer,
+  isAnyOf
+} from '@reduxjs/toolkit';
 import { ReducerWithInitialState } from '@reduxjs/toolkit/dist/createReducer';
 
 import { EssentialLink } from './link';
-import { setOptions } from './redux';
-import { Class, SymbolID } from './types';
+import { setOptions, useRedux } from './redux';
+import { Action, Class, SymbolID } from './types';
 
 type LinkEntries = {
   link: InstanceType<Class<EssentialLink>>;
   reducer: ReducerWithInitialState<any>;
+  listeners: any[];
+  subscription: UnsubscribeListener;
 };
 
 export class EssentialStore {
@@ -17,9 +26,10 @@ export class EssentialStore {
     setOptions(options);
   }
 
-  addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
+  public addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
     if (!this.links.has(link.namespace)) {
       const reducers = link.getReducers();
+      const { store } = useRedux();
 
       const reducer = createReducer(link.initial, builder => {
         if (reducers) {
@@ -31,7 +41,45 @@ export class EssentialStore {
         builder.addDefaultCase(state => state);
       });
 
-      this.links.set(link.namespace, { link, reducer });
+      const subscription = this.initMiddleware(link);
+
+      store.replaceReducer(
+        combineReducers({ [link.namespace.key.toString()]: reducer })
+      );
+
+      this.links.set(link.namespace, {
+        link,
+        listeners: [],
+        reducer,
+        subscription
+      });
     }
+  }
+
+  public getDispatchers(linkID: SymbolID) {
+    const { link } = this.links.get(linkID) || {};
+
+    if (link) {
+      return link.actions as Record<string, Action>;
+    }
+
+    throw new Error('Link not found');
+  }
+
+  private initMiddleware<Link extends EssentialLink>(
+    link: InstanceType<Class<Link>>
+  ) {
+    const { middleware } = useRedux();
+
+    return middleware.startListening({
+      effect: async (action, _listenerApi) => {
+        // eslint-disable-next-line no-console
+        console.log(action);
+      },
+      matcher: isAnyOf(
+        createAction('@INIT'),
+        ...Object.values(link.actions as Record<string, Action>)
+      )
+    });
   }
 }

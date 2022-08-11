@@ -35,7 +35,8 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     SymbolID,
     Array<{
       action: Action;
-      reducer: (parameters: { state: State; payload: any }) => State;
+      //reducer: (parameters: { state: State; payload: any }) => State;
+      reducer: (state: State) => State | void;
     }>
   >();
 
@@ -56,9 +57,30 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
   }
 
   public getReducers() {
-    return this.reducers.get(this.namespace);
+    return this.actions ? this.reducers.get(this.namespace) : [];
   }
 
+  protected createAction<Action = undefined>(
+    action: string,
+    callback: (...arguments_: any[]) => (state: State) => State | void
+  ) {
+    const namespace = this.namespace.key.toString();
+    const actionCall = createAction<Action>(`@${namespace}/${action}`);
+    const reducers = this.reducers.get(this.namespace);
+    const reducer = callback.call(this);
+
+    const isPushed = reducers?.some(
+      reducer => reducer.action.type === actionCall.type
+    );
+
+    if (reducers && !isPushed) {
+      reducers.push({ action: actionCall, reducer });
+    }
+
+    return actionCall;
+  }
+
+  /*
   protected registerReducer(
     action: Action,
     reduce: (parameters: { state: State; payload: any }) => State
@@ -76,7 +98,6 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     return createAction<Action>(`@${namespace}/${action}`);
   }
 
-  /*
   protected createReducer(
     action: Action,
     reduce: (parameters: { state: Draft<State>; payload: any }) => State
@@ -106,7 +127,7 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     this.reducers.set(this.namespace, reducers);
 
     return reducer;
-  }*/
+  }
 
   protected dispatch(action: AnyAction) {
     const { store } = useRedux();
@@ -114,7 +135,6 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     return store.dispatch(action);
   }
 
-  /*
   private initMiddleware(listenerMiddleware: ListenerMiddlewareInstance) {
     const reducers = this.reducers.get(this.namespace) as Array<{
       action: Action;

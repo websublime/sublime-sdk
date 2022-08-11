@@ -2,16 +2,15 @@ import { Draft } from '@reduxjs/toolkit';
 
 import { uniqueID } from './helpers';
 import { EssentialLink } from './link';
+import { useRedux } from './redux';
 import { EssentialStore } from './store';
 
 describe('> EssentialLink', () => {
   test('It should create a essential link class', () => {
     debugger;
     const FooLinkID = { key: Symbol(uniqueID()) };
-    const BarLinkID = { key: Symbol(uniqueID()) };
 
     type FooState = { count: number };
-    type BarState = { message: string };
 
     // FOOLINK
     class FooLink extends EssentialLink<FooState> {
@@ -20,21 +19,22 @@ describe('> EssentialLink', () => {
       }
 
       get actions() {
-        const increment = this.createAction<number | undefined>('INCREMENT');
-        const decrement = this.createAction<number | undefined>('DECREMENT');
-
-        this.registerReducer(increment, this.increment);
-        this.registerReducer(decrement, this.decrement);
-
         return {
-          decrement,
-          increment
+          poc: this.createAction<number>('POC', this.poc)
         };
       }
 
       bootstrap() {
         // eslint-disable-next-line no-console
         console.log('BOOTSTRAP');
+      }
+
+      private poc(increment: number) {
+        return (state: FooState) => {
+          debugger;
+          state.count = increment;
+          return state;
+        };
       }
 
       private increment(parameters: {
@@ -56,36 +56,18 @@ describe('> EssentialLink', () => {
       }
     }
 
-    // BARLINK
-    class BarLink extends EssentialLink<BarState> {
-      get initial() {
-        return { message: '' };
-      }
-
-      get actions() {
-        const message = this.createAction<string | undefined>('MESSAGE');
-
-        this.createReducer(message, this.message);
-
-        return {
-          message
-        };
-      }
-
-      private message(parameters: { state: Draft<BarState>; payload: string }) {
-        parameters.state.message = parameters.payload;
-
-        return parameters.state;
-      }
-    }
-
     const fooLink = new FooLink(FooLinkID);
-    const barLink = new BarLink(BarLinkID);
 
     const store = new EssentialStore({ devTools: true });
 
     store.addLink(fooLink);
-    store.addLink(barLink);
+    const dispacther = store.getDispatchers(FooLinkID);
+
+    dispacther.poc(1);
+
+    const { store: reduxStore } = useRedux();
+
+    console.log(reduxStore.getState());
 
     expect(true).toBeTruthy();
   });
