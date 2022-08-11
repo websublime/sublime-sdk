@@ -41,11 +41,10 @@ export class EssentialStore {
         builder.addDefaultCase(state => state);
       });
 
-      const subscription = this.initMiddleware(link);
+      const linkReducer = { [link.namespace.key.toString()]: reducer };
+      store.replaceReducer(combineReducers(linkReducer));
 
-      store.replaceReducer(
-        combineReducers({ [link.namespace.key.toString()]: reducer })
-      );
+      const subscription = this.initMiddleware(link);
 
       this.links.set(link.namespace, {
         link,
@@ -70,16 +69,16 @@ export class EssentialStore {
     link: InstanceType<Class<Link>>
   ) {
     const { middleware } = useRedux();
+    //const actions = Object.values(link.actions as Record<string, Action>);
 
     return middleware.startListening({
       effect: async (action, _listenerApi) => {
         // eslint-disable-next-line no-console
         console.log(action);
       },
-      matcher: isAnyOf(
-        createAction('@INIT'),
-        ...Object.values(link.actions as Record<string, Action>)
-      )
+      predicate: (action, _currentState: unknown) => {
+        return action.type !== link.namespace.key.toString();
+      }
     });
   }
 }

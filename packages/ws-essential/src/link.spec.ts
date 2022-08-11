@@ -18,22 +18,20 @@ describe('> EssentialLink', () => {
         return { count: 0 };
       }
 
-      get actions() {
-        return {
-          poc: this.createAction<number>('POC', this.poc)
-        };
-      }
-
       bootstrap() {
         // eslint-disable-next-line no-console
         console.log('BOOTSTRAP');
+        const poc = this.createAction<number>('POC', this.poc);
+
+        this.actions = {
+          poc
+        };
       }
 
-      private poc(increment: number) {
-        return (state: FooState) => {
+      private poc() {
+        return (state: FooState, action) => {
           debugger;
-          state.count = increment;
-          return state;
+          state.count = action.payload;
         };
       }
 
@@ -63,9 +61,9 @@ describe('> EssentialLink', () => {
     store.addLink(fooLink);
     const dispacther = store.getDispatchers(FooLinkID);
 
-    dispacther.poc(1);
-
     const { store: reduxStore } = useRedux();
+    //reduxStore.dispatch(dispacther.poc(1));
+    dispacther.poc(1);
 
     console.log(reduxStore.getState());
 

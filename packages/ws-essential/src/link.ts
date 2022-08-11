@@ -1,13 +1,5 @@
 /* eslint-disable unicorn/no-array-reduce */
-import {
-  AnyAction,
-  Draft,
-  ListenerMiddlewareInstance,
-  createAction,
-  createReducer,
-  isAnyOf
-} from '@reduxjs/toolkit';
-import { ReducerWithInitialState } from '@reduxjs/toolkit/dist/createReducer';
+import { AnyAction, createAction } from '@reduxjs/toolkit';
 
 import { useRedux } from './redux';
 import { Action, SymbolID } from './types';
@@ -21,7 +13,7 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
    */
   abstract readonly initial: State;
 
-  abstract readonly actions: Actions;
+  public actions!: Actions;
 
   /**
    * Unique namespace to identify on state tree the
@@ -36,7 +28,7 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     Array<{
       action: Action;
       //reducer: (parameters: { state: State; payload: any }) => State;
-      reducer: (state: State) => State | void;
+      reducer: (state: State, action: AnyAction) => State | void;
     }>
   >();
 
@@ -60,12 +52,14 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
     return this.actions ? this.reducers.get(this.namespace) : [];
   }
 
-  protected createAction<Action = undefined>(
+  protected createAction<A = undefined>(
     action: string,
-    callback: (...arguments_: any[]) => (state: State) => State | void
+    callback: (
+      ...arguments_: any[]
+    ) => (state: State, action: AnyAction) => State | void
   ) {
     const namespace = this.namespace.key.toString();
-    const actionCall = createAction<Action>(`@${namespace}/${action}`);
+    const actionCall = createAction<A>(`@${namespace}/${action}`);
     const reducers = this.reducers.get(this.namespace);
     const reducer = callback.call(this);
 
@@ -77,7 +71,14 @@ export abstract class EssentialLink<State = any, Actions = unknown> {
       reducers.push({ action: actionCall, reducer });
     }
 
-    return actionCall;
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return (payload = undefined) => this.dispatch(actionCall(payload));
+  }
+
+  protected dispatch(action: AnyAction) {
+    const { store } = useRedux();
+
+    store.dispatch(action);
   }
 
   /*
