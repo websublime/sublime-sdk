@@ -40,7 +40,7 @@ const isStoreAvailable = () => {
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
     const options = {
-      devTools: (process.env.NODE_ENV || 'production') !== 'production',
+      devTools: import.meta.env.DEV,
       ...storeOptions
     };
 
