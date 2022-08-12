@@ -34,11 +34,10 @@
       "sass": "^1.51.0",
       "ts-jest": "^28.0.7",
       "typescript": "^4.5.4",
-      "vite": "^3.0.2"
-    },
-    "dependencies": {
+      "vite": "^3.0.2",
       "@reduxjs/toolkit": "^1.8.1"
     },
+    "dependencies": {},
     "main": "./dist/ws-essential.cjs.js",
     "module": "./dist/ws-essential.es.js",
     "types": "./dist/@types/index.d.ts",

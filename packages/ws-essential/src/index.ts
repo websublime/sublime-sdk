@@ -7,4 +7,7 @@
  */
 
 export { useStore } from './main';
+export { EssentialLink } from './link';
 export type { Environment, SymbolID } from './types';
+export { nanoid } from '@reduxjs/toolkit';
+export type { AnyAction } from '@reduxjs/toolkit';

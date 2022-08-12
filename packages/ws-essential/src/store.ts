@@ -1,3 +1,10 @@
+/**
+ * Copyright Websublime All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://websublime.dev/license
+ */
+
 import {
   AnyAction,
   ConfigureStoreOptions,
@@ -28,6 +35,8 @@ type LinkEntries = {
 export class EssentialStore {
   private links = new WeakMap<SymbolID, LinkEntries>();
 
+  private ids: Array<SymbolID> = [];
+
   constructor(options: Partial<ConfigureStoreOptions>) {
     setOptions(options);
   }
@@ -48,7 +57,10 @@ export class EssentialStore {
       });
 
       const linkReducer = { [link.namespace.key.toString()]: reducer };
-      store.replaceReducer(combineReducers(linkReducer));
+      const cachedEntries = this.getLinkReducers();
+      store.replaceReducer(
+        combineReducers({ ...cachedEntries, ...linkReducer })
+      );
 
       const subscription = this.initMiddleware(link);
 
@@ -58,6 +70,8 @@ export class EssentialStore {
         reducer,
         subscription
       });
+
+      this.ids.push(link.namespace);
     }
   }
 
@@ -126,12 +140,24 @@ export class EssentialStore {
     });
   }
 
+  private getLinkReducers(): Record<string, ReducerWithInitialState<any>> {
+    // eslint-disable-next-line unicorn/no-array-reduce
+    return this.ids.reduce((accumulator, item) => {
+      const entry = this.links.get(item) as LinkEntries;
+
+      return {
+        ...accumulator,
+        [entry.link.namespace.key.toString()]: entry?.reducer
+      };
+    }, {});
+  }
+
   private removeListener(linkID: SymbolID, id?: string) {
     const linkEntries = this.links.get(linkID);
 
     if (linkEntries) {
       linkEntries.listeners = id
-        ? linkEntries.listeners.filter(listener => listener.id === id)
+        ? linkEntries.listeners.filter(listener => listener.id !== id)
         : linkEntries.listeners.filter(listener => listener.once === false);
 
       this.links.set(linkID, linkEntries);

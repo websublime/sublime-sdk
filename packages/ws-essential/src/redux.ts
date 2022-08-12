@@ -19,6 +19,12 @@ type StoreProvider = {
   listenerMiddleware: ReturnType<typeof createListenerMiddleware>;
 };
 
+/**
+ * Initialize default redux store with a root reducer,
+ * middleware.
+ *
+ * @private
+ */
 const initConfigureStore = () => {
   const scope: StoreProvider = {
     listenerMiddleware: createListenerMiddleware(),

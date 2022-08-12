@@ -1,7 +1,10 @@
 // eslint-disable-next-line unicorn/prefer-module
+const { version } = require('./package.json');
+
+// eslint-disable-next-line unicorn/prefer-module
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: ['./src/**/*.{js,ts,tsx}', '!**/*.d.ts'],
+  collectCoverageFrom: ['./src/**/*.{js,ts,tsx}', '!**/*.d.ts', '!**/app.ts'],
   coverageThreshold: {
     global: {
       branches: 65,
@@ -12,6 +15,7 @@ module.exports = {
   },
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
+    Version: version,
     'ts-jest': {
       // babelConfig: true,
       diagnostics: false,
@@ -28,6 +32,7 @@ module.exports = {
   },
   rootDir: '.',
   roots: ['<rootDir>'],
+  // setupFilesAfterEnv: ['./jest.setup.js'],
   testMatch: ['<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)'],
   transform: {
     '\\.(ts|tsx)$': 'ts-jest'

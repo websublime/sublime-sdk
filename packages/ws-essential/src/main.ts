@@ -4,7 +4,6 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
-
 import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 
 import { isSsr } from './helpers';
@@ -25,14 +24,19 @@ declare global {
   }
 }
 
-const context: { essential?: EssentialStoreObject } = isSsr()
-  ? {}
+const context: { essential: EssentialStoreObject } = isSsr()
+  ? ({} as any)
   : window.top || window;
 
 const isStoreAvailable = () => {
-  return !!context.essential?.store;
+  return !!context.essential.store;
 };
 
+/**
+ * It shares the same instance (singleton) of our store.
+ *
+ * @public
+ */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
     const options = {
@@ -47,5 +51,5 @@ export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
     });
   }
 
-  return context.essential;
+  return context.essential.store;
 };

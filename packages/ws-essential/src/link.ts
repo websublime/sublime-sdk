@@ -4,6 +4,12 @@ import { AnyAction, createAction } from '@reduxjs/toolkit';
 import { useRedux } from './redux';
 import { Action, Dispatcher, Reducer, SymbolID } from './types';
 
+/**
+ * This class is to be extended to create new links that
+ * can be added to the essential store.
+ *
+ * @public
+ */
 export abstract class EssentialLink<State = any> {
   /**
    * Initial is the default or initial state that should be applied
@@ -21,6 +27,11 @@ export abstract class EssentialLink<State = any> {
    */
   public namespace: SymbolID;
 
+  /**
+   * Properties metadata to create action, reducer and dispatcher.
+   *
+   * @private
+   */
   private properties = new WeakMap<
     SymbolID,
     Array<{
@@ -32,6 +43,7 @@ export abstract class EssentialLink<State = any> {
 
   /**
    * Hook function to customize construct lifecycle
+   * and use it to create your actions map of reducers.
    *
    * @public
    */
@@ -46,10 +58,21 @@ export abstract class EssentialLink<State = any> {
     }
   }
 
+  /**
+   * Get Link properties for current defined link.
+   *
+   * @public
+   */
   public getProperties() {
     return this.properties.get(this.namespace) || [];
   }
 
+  /**
+   * Creates action based on namespace,
+   * also creates a reducer based on the name of the callback
+   *
+   * @protected
+   */
   protected createAction<A = undefined>(
     action: string,
     callback: (...arguments_: any[]) => Reducer<State>
@@ -75,6 +98,11 @@ export abstract class EssentialLink<State = any> {
     return dispatcher;
   }
 
+  /**
+   * Dispatch the action on redux store.
+   *
+   * @protected
+   */
   protected dispatch(action: AnyAction) {
     const { store } = useRedux();
 
