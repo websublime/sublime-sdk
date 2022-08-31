@@ -44,8 +44,6 @@ describe('> EssentialLink', () => {
 
     const dispacther = store.getDispatchers<FooDispatchers>(FooLinkID);
     const unsubscribe = store.subscribe(FooLinkID, state => {
-      // TODO. unsubscribe not working
-      debugger;
       expect(state).toEqual({ count: 1 });
       unsubscribe();
     });

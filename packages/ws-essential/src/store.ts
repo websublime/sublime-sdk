@@ -8,16 +8,19 @@
 import {
   AnyAction,
   ConfigureStoreOptions,
+  Store,
   UnsubscribeListener,
   combineReducers,
+  configureStore,
   createAction,
+  createListenerMiddleware,
   createReducer,
   nanoid
 } from '@reduxjs/toolkit';
 import { ReducerWithInitialState } from '@reduxjs/toolkit/dist/createReducer';
 
 import { EssentialLink } from './link';
-import { setOptions, useRedux } from './redux';
+// import { setOptions, useRedux } from './redux';
 import { Class, SymbolID } from './types';
 
 type LinkEntries = {
@@ -37,14 +40,36 @@ export class EssentialStore {
 
   private ids: Array<SymbolID> = [];
 
+  private store: Store;
+
+  private listenerMiddleware: ReturnType<typeof createListenerMiddleware>;
+
   constructor(options: Partial<ConfigureStoreOptions>) {
-    setOptions(options);
+    //setOptions(options);
+    const rootReducer = createReducer<Record<string, unknown>>({}, builder => {
+      builder.addDefaultCase(state => {
+        return state;
+      });
+    });
+
+    this.listenerMiddleware = createListenerMiddleware();
+
+    this.store = configureStore({
+      middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+          serializableCheck: false
+        }).prepend(this.listenerMiddleware.middleware),
+      reducer: rootReducer,
+      ...options
+    });
   }
 
   public addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
     if (!this.links.has(link.namespace)) {
+      link.setStore(this.store);
+
       const reducers = link.getProperties();
-      const { store } = useRedux();
+      //const { store } = useRedux();
 
       const reducer = createReducer(link.initial, builder => {
         if (reducers) {
@@ -58,7 +83,7 @@ export class EssentialStore {
 
       const linkReducer = { [link.namespace.key.toString()]: reducer };
       const cachedEntries = this.getLinkReducers();
-      store.replaceReducer(
+      this.store.replaceReducer(
         combineReducers({ ...cachedEntries, ...linkReducer })
       );
 
@@ -106,13 +131,13 @@ export class EssentialStore {
   private initMiddleware<Link extends EssentialLink>(
     link: InstanceType<Class<Link>>
   ) {
-    const { middleware } = useRedux();
+    //const { middleware } = useRedux();
     const properties = link.getProperties() || [];
     const actions = properties.map(property => property.action);
 
     actions.push(createAction(link.namespace.key.toString()));
 
-    return middleware.startListening({
+    return this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
         const { listeners } = this.links.get(link.namespace) || {};
         const stateName: string = link.namespace.key.toString();

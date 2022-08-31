@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-array-reduce */
-import { AnyAction, createAction } from '@reduxjs/toolkit';
+import { AnyAction, Store, createAction } from '@reduxjs/toolkit';
 
-import { useRedux } from './redux';
+//import { useRedux } from './redux';
 import { Action, Dispatcher, Reducer, SymbolID } from './types';
 
 /**
@@ -40,6 +40,8 @@ export abstract class EssentialLink<State = any> {
       dispatcher: Dispatcher;
     }>
   >();
+
+  private store!: Store;
 
   /**
    * Hook function to customize construct lifecycle
@@ -98,14 +100,18 @@ export abstract class EssentialLink<State = any> {
     return dispatcher;
   }
 
+  public setStore(store: Store) {
+    this.store = store;
+  }
+
   /**
    * Dispatch the action on redux store.
    *
    * @protected
    */
   protected dispatch(action: AnyAction) {
-    const { store } = useRedux();
+    // const { store } = useRedux();
 
-    store.dispatch(action);
+    this.store.dispatch(action);
   }
 }

@@ -6,8 +6,19 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-export { useStore } from './main';
+import { isSsr } from './helpers';
+import { useStore, } from './main';
+
 export { EssentialLink } from './link';
 export type { Environment, SymbolID } from './types';
 export { nanoid } from '@reduxjs/toolkit';
 export type { AnyAction } from '@reduxjs/toolkit';
+
+if (!isSsr()) {
+  const environment = process.env.NODE_ENV || 'production';
+  useStore({
+    devTools: environment !== 'production'
+  });
+}
+
+export { useStore } from './main';
