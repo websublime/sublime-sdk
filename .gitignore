@@ -2,11 +2,11 @@ dist/
 www/
 loader/
 temp/
+tmp/
 
 *~
 *.sw[mnpcod]
 *.log
-*.lock
 *.tmp
 *.tmp.*
 log.txt
@@ -19,6 +19,7 @@ log.txt
 .versions/
 node_modules/
 $RECYCLE.BIN/
+coverage/
 
 .DS_Store
 Thumbs.db

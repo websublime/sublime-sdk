@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Essential Vanilla Example</title>
+  </head>
+  <body>
+    <div id="app">
+      <button type="button" id="increment">Increment</button>
+      <button type="button" id="decrement">Decrement</button>
+      <div id="example"></div>
+      <hr>
+      <input type="text" id="message">
+      <button type="button" id="publish">Add message</button>
+      <div id="messages"></div>
+    </div>
+
+    <script type="module" src="./dist/ws-essential.es.js"></script>
+    <script type="module" src="./src/app.ts"></script>
+  </body>
+</html>

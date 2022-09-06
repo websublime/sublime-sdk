@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Setup node
         uses: actions/setup-node@v2
@@ -33,9 +34,14 @@ jobs:
       - name: Build
         run: yarn build
 
+      - name: Test echo
+        run: |
+          git --no-pager diff --name-only origin/main HEAD
+          git rev-list --objects --all --count
+
       - name: Artifacts
         run: |
-          wget https://github.com/websublime/sublime-cli/releases/download/v0.1.2/sublime-v0.1.2-linux-amd64.tar.gz
-          tar -xf sublime-v0.1.2-linux-amd64.tar.gz sublime
+          wget https://github.com/websublime/sublime-cli/releases/download/v0.1.6/sublime-v0.1.6-linux-amd64.tar.gz
+          tar -xf sublime-v0.1.6-linux-amd64.tar.gz sublime
           chmod +x sublime
           ./sublime action --type branch --env "$NODE_ENV"
