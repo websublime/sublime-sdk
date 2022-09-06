@@ -13,6 +13,13 @@
    "scope": "@websublime",
    "type": "pkg",
    "description": "Global redux-kit connection"
+  },
+  {
+   "id": "b7046d22-d252-44e0-907f-0052ab4edaf2",
+   "name": "ws-globals",
+   "scope": "@websublime",
+   "type": "pkg",
+   "description": "Sublime globals"
   }
  ]
 }

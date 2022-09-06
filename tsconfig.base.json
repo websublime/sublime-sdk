@@ -21,6 +21,10 @@
   {
    "path": "packages/ws-essential",
    "name": "@websublime/ws-essential"
+  },
+  {
+   "path": "packages/ws-globals",
+   "name": "@websublime/ws-globals"
   }
  ],
  "exclude": [
