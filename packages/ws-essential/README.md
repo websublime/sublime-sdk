@@ -26,7 +26,7 @@ Essential is a redux toolkit for window or node. Essential as a diferent approac
 The concept is to create a "Link" that will operate your redux actions/reducers. Every entry on the root state is connected to this link and the link instance is the responsable to produce changes on that slice state. Let's go by example. Let's took an example of publish messages. Let's create the Link first:
 
 ```
-import { EssentialLink } from '@websublime/ws-essential';
+import { PayloadAction, EssentialLink } from '@websublime/ws-essential';
 
 const BarLinkID = { key: Symbol('NAMESPACE-MESSAGES') };
 
@@ -36,55 +36,55 @@ type BarDispatchers = {
 };
 
 class BarLink extends EssentialLink<BarState> {
-  get initial() {
+  get initialState() {
     return { message: '' };
   }
 
-  bootstrap() {
-    this.createAction<string>('PUBLISH', this.publish);
-  }
-
-  private publish() {
-    return (state: BarState, action) => {
-      state.message = action.payload;
+  protected definedActions() {
+    return {
+      publish: this.publish
     };
   }
-}
-```
 
-Every link should have a unique and singleton id as seen on ```BarLinkID```, this will be used to identify your link, also your entry on root state redux. Also we type the state of our link and the dispatchers that will be public available. The ```get initial()``` getter defines your initail/default state. Mutations to state are only allowed inside the reducer. The ```bootstrap``` method is an hook where you should create your actions mapping the internal method that will be used as reducer. Like we see it on the above class, example:
-
-```
-bootstrap() {
-  this.createAction<string>('PUBLISH', this.publish);
-}
-
-private publish() {
-  return (state: BarState, action) => {
+  private publish(state: BarState, action: PayloadAction<string>) {
     state.message = action.payload;
+  }
+}
+```
+
+Every link should have a unique and singleton id as seen on ```BarLinkID```, this will be used to identify your link, also your entry on root state redux. Also we type the state of our link and the dispatchers that will be public available. The ```get initialState()``` getter defines your initail/default state. Mutations to state are only allowed inside the reducer. The ```definedActions``` method is an hook where you should define your actions mapping the internal method that will be used as reducer/trigger. Like we see it on the above class, example:
+
+```
+protected definedActions() {
+  return {
+    publish: this.publish
   };
 }
+
+private publish(state: BarState, action) {
+  state.message = action.payload;
+}
 ```
 
-It means, action ```PUBLISH``` will be created and the reducer ```this.publish``` will be used to change state. Also the typing ```<string>``` in action means that ```action.payload``` will be string type. Now our Link class is ready to be part of the store.
+It means, action ```publish``` will be created and the reducer ```this.publish``` will be used to change state. Also the typing ```<string>``` in action means that ```action.payload``` will be string type. Now our Link class is ready to be part of the store.
 
 ```
-import { useStore, AnyAction } from '@websublime/ws-essential';
+import { useStore, PayloadAction } from '@websublime/ws-essential';
 
 const store = useStore();
 
-store.addLink(new FooLink(FooLinkID));
+store.addLink(new BarLink(BarLinkID));
 
-store.subscribe(FooLinkID, (state: BarState, action: AnyAction) => {
+store.subscribe(BarLinkID, (state: BarState, action: PayloadAction<string>) => {
   console.log(state.message);
 });
 
-const dispacther = store.getDispatchers<FooDispatchers>(FooLinkID);
+const dispacther = store.getDispatchers<BarDispatchers>(BarLinkID);
 
-dispacther.increment(1);
+dispacther.publish('Hello World');
 ```
 
-The ```store``` is a empty redux store, ready to accept links on it. Add your new state to the store by adding a link like: ```store.addLink(new FooLink(FooLinkID))```, now you can subscribe to changes that happen on that namespace and also get the dispatchers to make changes on the namespace state.
+The ```store``` is a empty redux store, ready to accept links on it. Add your new slice state to the store by adding a link like: ```store.addLink(new BarLink(BarLinkID))```, now you can subscribe to changes that happen on that namespace and also get the dispatchers to make changes on the namespace state.
 
 
 
