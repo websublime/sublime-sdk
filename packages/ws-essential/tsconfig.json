@@ -30,6 +30,7 @@
       "composite": true
     },
     "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "types/**/*.d.ts"],
+    "exclude": ["tmp/**"],
     "extends": "../../tsconfig.base.json",
     "references": [
       {

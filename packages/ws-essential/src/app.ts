@@ -1,5 +1,12 @@
+/**
+ * Copyright Websublime All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://websublime.dev/license
+ */
 import { EssentialLink } from './link';
-import { useStore } from './main';
+
+import { PayloadAction, useStore } from './index';
 
 document.addEventListener('readystatechange', function() {
   const state = document.readyState;
@@ -33,42 +40,40 @@ function init() {
 
   // FOOLINK
   class FooLink extends EssentialLink<FooState> {
-    get initial() {
+    get initialState() {
       return { count: 0 };
     }
 
-    bootstrap() {
-      this.createAction<number>('INCREMENT', this.increment);
-      this.createAction<number>('DECREMENT', this.decrement);
-    }
-
-    private increment() {
-      return (state: FooState, action) => {
-        state.count = state.count + action.payload;
+    protected definedActions() {
+      return {
+        decrement: this.decrement,
+        increment: this.increment
       };
     }
 
-    private decrement() {
-      return (state: FooState, action) => {
-        state.count = state.count - action.payload;
-      };
+    private increment(state: FooState, action: PayloadAction<number>) {
+      state.count = state.count + action.payload;
+    }
+
+    private decrement(state: FooState, action: PayloadAction<number>) {
+      state.count = state.count - action.payload;
     }
   }
 
   // BARLINK
   class BarLink extends EssentialLink<BarState> {
-    get initial() {
+    get initialState() {
       return { message: '' };
     }
 
-    bootstrap() {
-      this.createAction<string>('PUBLISH', this.publish);
+    protected definedActions() {
+      return {
+        publish: this.publish
+      };
     }
 
-    private publish() {
-      return (state: BarState, action) => {
-        state.message = action.payload;
-      };
+    private publish(state: BarState, action: PayloadAction<string>) {
+      state.message = action.payload;
     }
   }
 
@@ -80,13 +85,13 @@ function init() {
   );
   const { publish } = store.getDispatchers<BarDispatchers>(BarLinkID);
 
-  store.subscribe(FooLinkID, state => {
+  store.subscribe(FooLinkID, (state: FooState) => {
     const element = document.querySelector('#example') as HTMLDivElement;
 
     element.innerHTML = `<span>${state.count}</span>`;
   });
 
-  store.subscribe(BarLinkID, state => {
+  store.subscribe(BarLinkID, (state: BarState) => {
     const element = document.querySelector('#messages') as HTMLDivElement;
     const message = document.createElement('p');
     message.textContent = state.message;

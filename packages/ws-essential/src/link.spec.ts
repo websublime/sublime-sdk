@@ -1,134 +1,240 @@
-import { nanoid } from '@reduxjs/toolkit';
+import { PayloadAction, nanoid } from '@reduxjs/toolkit';
 
 import { EssentialLink } from './link';
 import { EssentialStore } from './store';
 
-describe('> EssentialLink', () => {
-  test('It should create a essential link class', () => {
+describe('> Link to EssentialStore', () => {
+  let store: EssentialStore;
+
+  beforeEach(() => {
+    store = new EssentialStore({
+      devTools: true
+    });
+  });
+
+  test('# It should create a essential link class', () => {
     const FooLinkID = { key: Symbol(nanoid()) };
 
     type FooState = { count: number };
     type FooDispatchers = {
-      increment: (payload: number) => void;
-      decrement: (payload: number) => void;
+      increment: (value: number) => void;
+      decrement: (value: number) => void;
     };
 
-    // FOOLINK
-    class FooLink extends EssentialLink<FooState> {
-      get initial() {
-        return { count: 0 };
-      }
-
-      bootstrap() {
-        this.createAction<number>('INCREMENT', this.increment);
-        this.createAction<number>('DECREMENT', this.decrement);
-      }
-
-      private increment() {
-        return (state: FooState, action) => {
-          state.count = state.count + action.payload;
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
         };
       }
 
-      private decrement() {
-        return (state: FooState, action) => {
-          state.count = state.count - action.payload;
+      protected definedActions() {
+        return {
+          decrement: this.decrement,
+          increment: this.increment
         };
+      }
+
+      private increment(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count + action.payload;
+      }
+
+      private decrement(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count - action.payload;
       }
     }
 
     const fooLink = new FooLink(FooLinkID);
-    const store = new EssentialStore({ devTools: true });
 
     store.addLink(fooLink);
-
-    const dispacther = store.getDispatchers<FooDispatchers>(FooLinkID);
-    const unsubscribe = store.subscribe(FooLinkID, state => {
+    store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
-      unsubscribe();
     });
 
-    dispacther.increment(1);
+    const { increment } = store.getDispatchers<FooDispatchers>(FooLinkID);
+
+    increment(1);
   });
 
-  test('It should manage multiple links', async () => {
+  test('# It should call change', async () => {
+    expect.assertions(4);
+
+    const FooLinkID = { key: Symbol(nanoid()) };
+
+    type FooState = { count: number };
+    type FooDispatchers = {
+      increment: (value: number) => void;
+      decrement: (value: number) => void;
+    };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      protected definedActions() {
+        return {
+          decrement: this.decrement,
+          increment: this.increment
+        };
+      }
+
+      private increment(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count + action.payload;
+      }
+
+      private decrement(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count - action.payload;
+      }
+
+      public change(
+        oldState: FooState,
+        newState: FooState,
+        action: PayloadAction<any>
+      ) {
+        expect(oldState).toEqual(this.initialState);
+        expect(newState).toEqual({ count: -1 });
+        expect(action).toEqual({
+          payload: 1,
+          type: `${FooLinkID.key.toString()}/decrement`
+        });
+      }
+    }
+
+    const spyChange = jest.spyOn(FooLink.prototype, 'change');
+    const fooLink = new FooLink(FooLinkID);
+
+    store.addLink(fooLink);
+    const { decrement } = store.getDispatchers<FooDispatchers>(FooLinkID);
+
+    decrement(1);
+
+    expect(spyChange).toHaveBeenCalledTimes(1);
+
+    spyChange.mockClear();
+  });
+
+  test('# It should create multiple links', async () => {
     expect.assertions(2);
 
     const FooLinkID = { key: Symbol(nanoid()) };
     const BarLinkID = { key: Symbol(nanoid()) };
 
     type FooState = { count: number };
-    type FooDispatchers = {
-      increment: (payload: number) => void;
-      decrement: (payload: number) => void;
-    };
-
     type BarState = { message: string };
-    type BarDispatchers = {
-      publish: (payload: string) => void;
+
+    type FooDispatchers = {
+      increment: (value: number) => void;
+      decrement: (value: number) => void;
     };
 
-    // FOOLINK
-    class FooLink extends EssentialLink<FooState> {
-      get initial() {
-        return { count: 0 };
-      }
+    type BarDispatchers = {
+      publish: (value: string) => void;
+    };
 
-      bootstrap() {
-        this.createAction<number>('INCREMENT', this.increment);
-        this.createAction<number>('DECREMENT', this.decrement);
-      }
-
-      private increment() {
-        return (state: FooState, action) => {
-          state.count = state.count + action.payload;
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
         };
       }
 
-      private decrement() {
-        return (state: FooState, action) => {
-          state.count = state.count - action.payload;
+      protected definedActions() {
+        return {
+          decrement: this.decrement,
+          increment: this.increment
         };
+      }
+
+      private increment(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count + action.payload;
+      }
+
+      private decrement(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count - action.payload;
       }
     }
 
-    // BARLINK
-    class BarLink extends EssentialLink<BarState> {
-      get initial() {
-        return { message: '' };
-      }
-
-      bootstrap() {
-        this.createAction<string>('PUBLISH', this.publish);
-      }
-
-      private publish() {
-        return (state: BarState, action) => {
-          state.message = action.payload;
+    class BarLink extends EssentialLink {
+      get initialState(): BarState {
+        return {
+          message: ''
         };
+      }
+
+      protected definedActions() {
+        return {
+          publish: this.publish
+        };
+      }
+
+      private publish(state: BarState, action: PayloadAction<string>) {
+        state.message = action.payload;
       }
     }
 
     const fooLink = new FooLink(FooLinkID);
     const barLink = new BarLink(BarLinkID);
 
-    const store = new EssentialStore({ devTools: true });
-
     store.addLink(fooLink);
     store.addLink(barLink);
+
+    store.subscribe(FooLinkID, (state: FooState) => {
+      expect(state).toEqual({ count: 1 });
+    });
+
+    store.subscribe(BarLinkID, (state: BarState) => {
+      expect(state).toEqual({ message: 'Hello World' });
+    });
 
     const { increment } = store.getDispatchers<FooDispatchers>(FooLinkID);
     const { publish } = store.getDispatchers<BarDispatchers>(BarLinkID);
 
-    store.subscribe(FooLinkID, state => {
-      expect(state).toEqual({ count: 1 });
-    });
-
-    store.subscribe(BarLinkID, state => {
-      expect(state).toEqual({ message: 'Hello World' });
-    });
-
     increment(1);
     publish('Hello World');
+  });
+
+  test('# It should call bootstrap', async () => {
+    expect.assertions(2);
+
+    const FooLinkID = { key: Symbol(nanoid()) };
+
+    type FooState = { count: number };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      protected definedActions() {
+        return {
+          decrement: this.decrement,
+          increment: this.increment
+        };
+      }
+
+      private increment(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count + action.payload;
+      }
+
+      private decrement(state: FooState, action: PayloadAction<number>) {
+        state.count = state.count - action.payload;
+      }
+
+      public bootstrap() {
+        expect(true).toBeTruthy();
+      }
+    }
+
+    const spyBootstrap = jest.spyOn(FooLink.prototype, 'bootstrap');
+    new FooLink(FooLinkID);
+
+    expect(spyBootstrap).toHaveBeenCalledTimes(1);
+
+    spyBootstrap.mockClear();
   });
 });

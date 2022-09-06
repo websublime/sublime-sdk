@@ -1,24 +1,59 @@
-/* eslint-disable prettier/prettier */
 /**
  * Copyright Websublime All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
+import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 
 import { isSsr } from './helpers';
-import { useStore, } from './main';
+import { EssentialStore } from './store';
+import { version } from './version';
 
-export { EssentialLink } from './link';
-export type { Environment, SymbolID } from './types';
-export { nanoid } from '@reduxjs/toolkit';
-export type { AnyAction } from '@reduxjs/toolkit';
+declare global {
+  interface EssentialStoreObject {
+    store: EssentialStore;
+    isStoreAvailable: () => boolean;
+    version: string;
+  }
 
-if (!isSsr()) {
-  const environment = process.env.NODE_ENV || 'production';
-  useStore({
-    devTools: environment !== 'production'
-  });
+  interface Window {
+    essential: EssentialStoreObject;
+  }
 }
 
-export { useStore } from './main';
+const context: { essential: EssentialStoreObject } = isSsr()
+  ? ({} as any)
+  : window.top || window;
+
+const isStoreAvailable = () => {
+  return !!context.essential.store;
+};
+
+/**
+ * It shares the same instance (singleton) of our store.
+ * @param storeOptions - Optional Redux ConfigureStoreOptions
+ * @public
+ */
+export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
+  if (!context.essential) {
+    const options = {
+      devTools: import.meta.env.DEV,
+      ...storeOptions
+    };
+
+    context.essential = Object.seal({
+      isStoreAvailable: isStoreAvailable,
+      store: new EssentialStore(options),
+      version
+    });
+  }
+
+  return context.essential.store;
+};
+
+export { nanoid } from '@reduxjs/toolkit';
+// eslint-disable-next-line prettier/prettier
+export type { PayloadAction } from '@reduxjs/toolkit';
+// eslint-disable-next-line prettier/prettier
+export type { SymbolID, Essential } from './types';

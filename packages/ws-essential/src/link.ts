@@ -1,59 +1,89 @@
-/* eslint-disable unicorn/no-array-reduce */
-import { AnyAction, Store, createAction } from '@reduxjs/toolkit';
+/**
+ * Copyright Websublime All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://websublime.dev/license
+ */
 
-//import { useRedux } from './redux';
-import { Action, Dispatcher, Reducer, SymbolID } from './types';
+import { AnyAction, Slice, createSlice } from '@reduxjs/toolkit';
+
+// eslint-disable-next-line prettier/prettier
+import type { AnyState, Essential, ReducerFunction, SymbolID } from './types';
 
 /**
- * This class is to be extended to create new links that
- * can be added to the essential store.
- *
+ * Essential link is a link slcie constructor to expose dispatcher on slice state
  * @public
  */
-export abstract class EssentialLink<State = any> {
+export abstract class EssentialLink<State extends AnyState = any> implements Essential<State> {
   /**
-   * Initial is the default or initial state that should be applied
-   * when creating link or to use it to restore/reset state to initial form
-   *
+   * Slice initial state
    * @public
    */
-  abstract readonly initial: State;
+  abstract readonly initialState: State;
 
   /**
-   * Unique namespace to identify on state tree the
-   * reducer state. Be aware that this should be unique string.
-   *
+   * Slice namespace
    * @public
    */
   public namespace: SymbolID;
 
   /**
-   * Properties metadata to create action, reducer and dispatcher.
-   *
-   * @private
+   * Define public actions
+   * @internal
    */
-  private properties = new WeakMap<
-    SymbolID,
-    Array<{
-      action: Action;
-      reducer: Reducer<State>;
-      dispatcher: Dispatcher;
-    }>
-  >();
-
-  private store!: Store;
+  protected abstract definedActions(): Record<string, ReducerFunction>;
 
   /**
-   * Hook function to customize construct lifecycle
-   * and use it to create your actions map of reducers.
-   *
-   * @public
+   * Lifecycle hook on creating new instance
+   * @internal
    */
   protected bootstrap?(): void;
 
+  /**
+   * Slice descriptor properties
+   * @internal
+   */
+  private sliceProps = new WeakMap<SymbolID, Slice<State>>();
+
+  /**
+   * Public dispatchers
+   * @readonly
+   */
+  get dispatchers() {
+    const dispatchers = {};
+
+    for (const [key, property] of Object.entries(this.actions)) {
+      dispatchers[key] = (payload?: any) =>
+        this.dispatch(property.call(property, payload));
+    }
+
+    return dispatchers;
+  }
+
+  /**
+   * Public main reducer
+   * @readonly
+   */
+  get reducer() {
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+
+    return properties.reducer;
+  }
+
+  /**
+   * Public actions
+   * @readonly
+   */
+  get actions() {
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+
+    return properties.actions;
+  }
+
   constructor(key: SymbolID) {
     this.namespace = key;
-    this.properties.set(this.namespace, []);
+
+    this.initSlice();
 
     if (this.bootstrap) {
       this.bootstrap();
@@ -61,57 +91,37 @@ export abstract class EssentialLink<State = any> {
   }
 
   /**
-   * Get Link properties for current defined link.
-   *
-   * @public
+   * Hook on any sate change
    */
-  public getProperties() {
-    return this.properties.get(this.namespace) || [];
+  public change?(oldState: State, newState: State, action: AnyAction): void;
+
+  /**
+   * Dispatch actions
+   * @internal
+   */
+  protected dispatch(_action?: AnyAction) {
+    console.error('Class must be registered thru EssentialLink store');
   }
 
   /**
-   * Creates action based on namespace,
-   * also creates a reducer based on the name of the callback
-   *
-   * @protected
+   * Creates and initialize state slice
+   * @internal
    */
-  protected createAction<A = undefined>(
-    action: string,
-    callback: (...arguments_: any[]) => Reducer<State>
-  ) {
-    const namespace = this.namespace.key.toString();
-    const actionCall = createAction<A>(`@${namespace}/${action}`);
-    const properties = this.properties.get(this.namespace);
-    const reducer = callback.call(this);
-    const dispatcher = (payload?: A) => this.dispatch(actionCall(payload));
+  private initSlice() {
+    const { initialState, namespace, sliceProps } = this;
+    const reducers = this.definedActions();
 
-    const isPushed = properties?.some(
-      property => property.action.type === actionCall.type
-    );
+    const slice = createSlice({
+      extraReducers: builder => {
+        builder.addDefaultCase(state => {
+          return state;
+        });
+      },
+      initialState,
+      name: namespace.key.toString(),
+      reducers
+    });
 
-    if (properties && !isPushed) {
-      properties.push({
-        action: actionCall,
-        dispatcher: { [callback.name]: dispatcher },
-        reducer
-      });
-    }
-
-    return dispatcher;
-  }
-
-  public setStore(store: Store) {
-    this.store = store;
-  }
-
-  /**
-   * Dispatch the action on redux store.
-   *
-   * @protected
-   */
-  protected dispatch(action: AnyAction) {
-    // const { store } = useRedux();
-
-    this.store.dispatch(action);
+    sliceProps.set(namespace, slice);
   }
 }

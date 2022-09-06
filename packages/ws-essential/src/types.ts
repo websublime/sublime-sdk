@@ -1,20 +1,42 @@
-import { ActionCreatorWithOptionalPayload, AnyAction } from "@reduxjs/toolkit";
+// eslint-disable-next-line prettier/prettier
+import type { AnyAction } from '@reduxjs/toolkit';
+
+/**
+ * Sicle namespace identifier
+ * @public
+ */
+export type SymbolID = {
+  key: symbol;
+};
+
+export type AnyState<S = any> = S extends Record<string, any> ? S : any;
 
 export type Class<Proto = unknown> = new (...arguments_: any[]) => Proto;
 
 // eslint-disable-next-line prettier/prettier
 export type Abstract<Proto = unknown> = abstract new (...arguments_: any[]) => Proto;
 
-// export type Interface<C extends Class<InstanceType<C>> | Abstract<InstanceType<C>> =
+export type ReducerFunction = <T extends {type: string, payload: any }>(state: any, action:T) => void;
 
-export type Action<T = any> = ActionCreatorWithOptionalPayload<T>;
-
-export type Reducer<State> = (state: State, action: AnyAction) => State | void;
-
-export type Dispatcher = Record<string, (payload?: any) => void>;
-
-export type SymbolID = {
-  key: symbol;
+export type LinkEntries<T extends Essential<AnyState>> = {
+  link: InstanceType<Class<T>>;
+  listeners: {
+    callback: (state: AnyState, action: AnyAction) => void;
+    priority: number;
+    once: boolean;
+    id: string;
+  }[];
 };
 
-export type Environment = 'local'|'production'|'development'|'staging'|'test';
+/**
+ * Essential signature implementation
+ * @public
+ */
+export interface Essential<State> {
+  namespace: SymbolID;
+  readonly dispatchers: unknown;
+  readonly initialState: State;
+  readonly reducer: any;
+  readonly actions: Record<string, any>;
+  change?: (oldState: State, newState: State, action: AnyAction) => void;
+}

@@ -4,48 +4,52 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
-
 import {
   AnyAction,
   ConfigureStoreOptions,
+  Reducer,
   Store,
-  UnsubscribeListener,
   combineReducers,
   configureStore,
-  createAction,
   createListenerMiddleware,
   createReducer,
   nanoid
 } from '@reduxjs/toolkit';
-import { ReducerWithInitialState } from '@reduxjs/toolkit/dist/createReducer';
 
-import { EssentialLink } from './link';
-// import { setOptions, useRedux } from './redux';
-import { Class, SymbolID } from './types';
+// eslint-disable-next-line prettier/prettier
+import type { EssentialLink } from './link';
+import type { Class, LinkEntries, SymbolID } from './types';
 
-type LinkEntries = {
-  link: InstanceType<Class<EssentialLink>>;
-  reducer: ReducerWithInitialState<any>;
-  listeners: {
-    callback: (state, action: AnyAction) => void;
-    priority: number;
-    once: boolean;
-    id: string;
-  }[];
-  subscription: UnsubscribeListener;
-};
-
+/**
+ * Essential store is the redux context
+ * @public
+ */
 export class EssentialStore {
-  private links = new WeakMap<SymbolID, LinkEntries>();
-
-  private ids: Array<SymbolID> = [];
-
+  /**
+   * Redux store
+   * @internal
+   */
   private store: Store;
 
+  /**
+   * Links registry
+   * @internal
+   */
+  private links = new WeakMap<SymbolID, LinkEntries<EssentialLink>>();
+
+  /**
+   * Links cache
+   * @internal
+   */
+  private ids: Array<SymbolID> = [];
+
+  /**
+   * Redux middleware listener
+   * @internal
+   */
   private listenerMiddleware: ReturnType<typeof createListenerMiddleware>;
 
   constructor(options: Partial<ConfigureStoreOptions>) {
-    //setOptions(options);
     const rootReducer = createReducer<Record<string, unknown>>({}, builder => {
       builder.addDefaultCase(state => {
         return state;
@@ -64,91 +68,108 @@ export class EssentialStore {
     });
   }
 
-  public addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
-    if (!this.links.has(link.namespace)) {
-      link.setStore(this.store);
+  /**
+   * Add links to registry and patch dispatch
+   * from redux store.
+   * @public
+   */
+  public addLink<Link extends EssentialLink>(
+    link: InstanceType<Class<Link>>
+  ) {
+    const { dispatch } = this.store;
 
-      const reducers = link.getProperties();
-      //const { store } = useRedux();
+    Object.defineProperty(link, 'dispatch', {
+      value: dispatch,
+      writable: false
+    });
 
-      const reducer = createReducer(link.initial, builder => {
-        if (reducers) {
-          for (const item of reducers) {
-            builder.addCase(item.action, item.reducer);
-          }
-        }
+    const linkReducer = { [link.namespace.key.toString()]: link.reducer };
+    const cachedEntries = this.getLinkReducers();
 
-        builder.addDefaultCase(state => state);
-      });
+    this.store.replaceReducer(
+      combineReducers({ ...cachedEntries, ...linkReducer })
+    );
 
-      const linkReducer = { [link.namespace.key.toString()]: reducer };
-      const cachedEntries = this.getLinkReducers();
-      this.store.replaceReducer(
-        combineReducers({ ...cachedEntries, ...linkReducer })
-      );
+    this.addListener(link);
 
-      const subscription = this.initMiddleware(link);
+    this.links.set(link.namespace, {
+      link,
+      listeners: []
+    });
 
-      this.links.set(link.namespace, {
-        link,
-        listeners: [],
-        reducer,
-        subscription
-      });
-
-      this.ids.push(link.namespace);
-    }
+    this.ids.push(link.namespace);
   }
 
-  public getDispatchers<A = any>(linkID: SymbolID) {
-    const { link } = this.links.get(linkID) || {};
-
-    if (link) {
-      const properties = link.getProperties();
-      // eslint-disable-next-line unicorn/no-array-reduce
-      return properties.reduce(
-        (accumulator, item) => ({ ...accumulator, ...item.dispatcher }),
-        {}
-      ) as A;
-    }
-
-    throw new Error('Link not found');
+  /**
+   * Get Link api dispatchers to trigger.
+   * @public
+   */
+  public getDispatchers<Dispatchers>(
+    linkID: SymbolID
+  ): Dispatchers {
+    const entry = this.links.get(linkID) as LinkEntries<EssentialLink>;
+    return entry.link.dispatchers as Dispatchers;
   }
 
+  /**
+   * Subscribe to slice changes.
+   * @public
+   */
   public subscribe(
     linkID: SymbolID,
-    callback: (state, action: AnyAction) => void,
+    callback: (state: any, action: AnyAction) => void,
     priority = 1
   ) {
-    const { listeners } = this.links.get(linkID) || {};
+    const { listeners } = this.links.get(linkID) as LinkEntries<EssentialLink>;
     const id = nanoid();
 
-    listeners?.push({ callback, id, once: false, priority });
+    listeners.push({ callback, id, once: false, priority });
 
     return () => this.removeListener(linkID, id);
   }
 
-  private initMiddleware<Link extends EssentialLink>(
+  /**
+   * Subscribe only once to slice changes.
+   * @public
+   */
+  public once(
+    linkID: SymbolID,
+    callback: (state: any, action: AnyAction) => void,
+    priority = 1
+  ) {
+    const { listeners } = this.links.get(linkID) as LinkEntries<EssentialLink>;
+    const id = nanoid();
+
+    listeners.push({ callback, id, once: true, priority });
+  }
+
+  /**
+   * Add callback to redux middleware
+   * @internal
+   */
+  private addListener<Link extends EssentialLink>(
     link: InstanceType<Class<Link>>
   ) {
-    //const { middleware } = useRedux();
-    const properties = link.getProperties() || [];
-    const actions = properties.map(property => property.action);
-
-    actions.push(createAction(link.namespace.key.toString()));
-
-    return this.listenerMiddleware.startListening({
+    this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
         const { listeners } = this.links.get(link.namespace) || {};
         const stateName: string = link.namespace.key.toString();
         const { [stateName]: state } = listenerApi.getState() as any;
+
+        if (link.change) {
+          const {
+            [stateName]: oldState
+          } = listenerApi.getOriginalState() as any;
+
+          link.change(oldState, state, action);
+        }
 
         const callbacks = listeners
           ?.sort((before, after) => after.priority - before.priority)
           // eslint-disable-next-line unicorn/no-array-reduce
           .reduce(
             (accumulator, item) => [...accumulator, item.callback],
-            [] as Array<(state, action: AnyAction) => void>
+            [] as Array<(state: unknown, action: AnyAction) => void>
           );
 
         if (callbacks) {
@@ -160,26 +181,36 @@ export class EssentialStore {
         this.removeListener(link.namespace);
       },
       predicate: (action, _currentState: unknown) => {
-        return actions.some(item => item.type === action.type);
+        const actions = Object.entries(link.actions);
+
+        return actions.some(([_key, item]) => item.type === action.type);
       }
     });
   }
 
-  private getLinkReducers(): Record<string, ReducerWithInitialState<any>> {
+  /**
+   * Get cached/registered links
+   * @internal
+   */
+  private getLinkReducers(): Record<string, Reducer> {
     // eslint-disable-next-line unicorn/no-array-reduce
-    return this.ids.reduce((accumulator, item) => {
-      const entry = this.links.get(item) as LinkEntries;
+    return this.ids.reduce((accumulator, id) => {
+      const entry = this.links.get(id) as LinkEntries<EssentialLink>;
 
       return {
         ...accumulator,
-        [entry.link.namespace.key.toString()]: entry?.reducer
+        [entry.link.namespace.key.toString()]: entry.link.reducer
       };
     }, {});
   }
 
+  /**
+   * Remove listerners/callbacks
+   * @internal
+   */
   private removeListener(linkID: SymbolID, id?: string) {
     const linkEntries = this.links.get(linkID);
-
+    //@TODO: remove ids from cache
     if (linkEntries) {
       linkEntries.listeners = id
         ? linkEntries.listeners.filter(listener => listener.id !== id)
