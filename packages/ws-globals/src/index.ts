@@ -8,6 +8,18 @@ import { useStore } from '@websublime/ws-essential';
 
 import { RegistryLink, RegistryLinkID } from './registry';
 
+declare global {
+  interface Window {
+    process: any;
+  }
+}
+
+window.process = {
+  env: {
+    NODE_ENV: 'production'
+  }
+};
+
 const initializeRegistry = () => {
   const store = useStore();
 

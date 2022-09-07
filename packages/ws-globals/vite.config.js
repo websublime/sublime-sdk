@@ -10,7 +10,12 @@ import { version } from './package.json';
 
 module.exports = defineConfig({
   define: {
-    Version: JSON.stringify(version)
+    Version: JSON.stringify(version),
+    global: 'globalThis',
+    'globalThis.process.env.NODE_ENV':
+      process.env.NODE_ENV === 'production'
+        ? JSON.stringify('production')
+        : JSON.stringify('development')
   },
   build: {
     lib: {
