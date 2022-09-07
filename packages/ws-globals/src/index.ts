@@ -6,24 +6,38 @@
  */
 import { useStore } from '@websublime/ws-essential';
 
+import {
+  EnvironmentDispatchers,
+  EnvironmentLink,
+  EnvironmentLinkID
+} from './environment';
 import { RegistryLink, RegistryLinkID } from './registry';
 
 declare global {
   interface Window {
-    process: any;
+    environment: {
+      apiUrl: string;
+      env: string;
+    };
   }
 }
 
-window.process = {
-  env: {
-    NODE_ENV: 'production'
-  }
-};
-
 const initializeRegistry = () => {
-  const store = useStore();
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  const { apiUrl, env = 'production' } = window.environment || {};
 
+  const store = useStore({
+    devTools: env !== 'production'
+  });
+
+  store.addLink(new EnvironmentLink(EnvironmentLinkID));
   store.addLink(new RegistryLink(RegistryLinkID));
+
+  const { setApiUrl, setEnvironment } =
+    store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
+
+  setApiUrl(apiUrl);
+  setEnvironment(env);
 };
 
 initializeRegistry();

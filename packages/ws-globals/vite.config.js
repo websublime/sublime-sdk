@@ -59,6 +59,6 @@ module.exports = defineConfig({
     postcss({
       inject: false
     }),
-    workspacesAlias(['../../'], ['vite'])
+    workspacesAlias(['../../'], ['vite', 'ws-essential'])
   ]
 });
