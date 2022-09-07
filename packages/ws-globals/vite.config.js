@@ -1,7 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/no-import-module-exports */
-import path from 'path';
+import path from 'node:path';
 
+import replace from '@rollup/plugin-replace';
 import { workspacesAlias } from '@websublime/vite';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
@@ -49,6 +50,12 @@ module.exports = defineConfig({
     }
   },
   plugins: [
+    replace({
+      'process.env.NODE_ENV':
+        process.env.NODE_ENV === 'production'
+          ? JSON.stringify('production')
+          : JSON.stringify('development')
+    }),
     postcss({
       inject: false
     }),

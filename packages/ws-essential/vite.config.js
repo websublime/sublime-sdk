@@ -2,6 +2,7 @@
 /* eslint-disable import/no-import-module-exports */
 import path from 'node:path';
 
+import replace from '@rollup/plugin-replace';
 import { workspacesAlias } from '@websublime/vite';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
@@ -21,7 +22,7 @@ module.exports = defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      fileName: format => `ws-essential.${format}.js`,
+      fileName: (format) => `ws-essential.${format}.js`,
       formats: ['es', 'cjs', 'umd'],
       name: 'ws-essential'
     },
@@ -53,6 +54,12 @@ module.exports = defineConfig({
     open: false
   },
   plugins: [
+    replace({
+      'process.env.NODE_ENV':
+        process.env.NODE_ENV === 'production'
+          ? JSON.stringify('production')
+          : JSON.stringify('development')
+    }),
     postcss({
       inject: false
     }),
