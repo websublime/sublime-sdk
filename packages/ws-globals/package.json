@@ -12,6 +12,7 @@
     },
     "devDependencies": {
       "@websublime/vite": "0.0.1",
+      "@websublime/ws-essential": "^0.1.0",
       "@microsoft/api-documenter": "^7.17.15",
       "@microsoft/api-extractor": "^7.24.1",
       "@types/jest": "^27.0.1",

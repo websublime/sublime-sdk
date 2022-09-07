@@ -53,6 +53,7 @@ export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
 };
 
 export { nanoid } from '@reduxjs/toolkit';
+export { EssentialLink } from './link';
 // eslint-disable-next-line prettier/prettier
 export type { PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line prettier/prettier

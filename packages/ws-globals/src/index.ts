@@ -1,3 +1,19 @@
-const WelcomeMessage = (message: string) => `Welcome ${message}`;
+/**
+ * Copyright Websublime All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://websublime.dev/license
+ */
+import { useStore } from '@websublime/ws-essential';
 
-export { WelcomeMessage }
+import { RegistryLink, RegistryLinkID } from './registry';
+
+const initializeRegistry = () => {
+  const store = useStore();
+
+  store.addLink(new RegistryLink(RegistryLinkID));
+};
+
+initializeRegistry();
+
+export { RegistryLinkID } from './registry';
