@@ -9,7 +9,6 @@ import { defineConfig } from 'vite';
 
 import { version } from './package.json';
 
-console.log(process.env.NODE_ENV);
 module.exports = defineConfig({
   define: {
     Version: JSON.stringify(version),

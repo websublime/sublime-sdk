@@ -14,6 +14,10 @@ type RegistryLinkState = {
   };
 };
 
+export type RegistryDispatchers = {
+  add: (value: Record<string, { id: string }>) => void;
+};
+
 export class RegistryLink extends EssentialLink<RegistryLinkState> {
   get initialState() {
     return {};

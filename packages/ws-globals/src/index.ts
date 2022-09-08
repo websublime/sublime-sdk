@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-const initializeRegistry = () => {
+const initializeEnvironment = () => {
   // eslint-disable-next-line unicorn/prevent-abbreviations
   const { apiUrl, env = 'production' } = window.environment || {};
 
@@ -31,7 +31,6 @@ const initializeRegistry = () => {
   });
 
   store.addLink(new EnvironmentLink(EnvironmentLinkID));
-  store.addLink(new RegistryLink(RegistryLinkID));
 
   const { setApiUrl, setEnvironment } =
     store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
@@ -40,6 +39,21 @@ const initializeRegistry = () => {
   setEnvironment(env);
 };
 
-initializeRegistry();
+const initializeRegistry = () => {
+  const store = useStore();
+
+  store.addLink(new RegistryLink(RegistryLinkID));
+};
+
+const boot = () => {
+  initializeEnvironment();
+  initializeRegistry();
+};
+
+boot();
 
 export { RegistryLinkID } from './registry';
+export { EnvironmentLinkID } from './environment';
+
+export type { RegistryDispatchers } from './registry';
+export type { EnvironmentDispatchers } from './environment';
