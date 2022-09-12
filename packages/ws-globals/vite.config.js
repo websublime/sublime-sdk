@@ -21,9 +21,9 @@ module.exports = defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      fileName: (format) => `ws-essential.${format}.js`,
+      fileName: (format) => `ws-globals.${format}.js`,
       formats: ['es', 'cjs', 'umd'],
-      name: 'ws-essential'
+      name: 'ws-globals'
     },
     polyfillDynamicImport: false,
     rollupOptions: {
@@ -49,9 +49,6 @@ module.exports = defineConfig({
       }
     }
   },
-  preview: {
-    open: false
-  },
   plugins: [
     replace({
       'process.env.NODE_ENV':
@@ -62,9 +59,6 @@ module.exports = defineConfig({
     postcss({
       inject: false
     }),
-    workspacesAlias(['../../'], ['vite'])
-  ],
-  optimizeDeps: {
-    include: ['@reduxjs/toolkit', 'redux']
-  }
+    workspacesAlias(['../../'], ['vite', '@websublime/ws-essential'])
+  ]
 });

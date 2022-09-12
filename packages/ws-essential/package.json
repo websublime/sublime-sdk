@@ -31,6 +31,7 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-postcss-lit": "^2.0.0",
     "rollup-plugin-typescript2": "^0.31.2",
+    "@rollup/plugin-replace": "^4.0.0",
     "sass": "^1.51.0",
     "ts-jest": "^28.0.7",
     "typescript": "^4.5.4",
@@ -43,9 +44,19 @@
   "types": "./dist/@types/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/ws-essential.cjs.js",
-      "import": "./dist/ws-essential.es.js"
-    }
+      "node": {
+        "module": "./dist/ws-essential.es.js",
+        "require": "./dist/ws-essential.cjs.js",
+        "import": "./dist/ws-essential.es.js"
+      },
+      "browser": {
+        "import": "./dist/ws-essential.es.js",
+        "require": "./dist/ws-essential.cjs.js"
+      },
+      "default": "./dist/ws-essential.es.js"
+    },
+    "./package.json": "./package.json",
+    "./dist/ws-essential.es.js": "./dist/ws-essential.es.js"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

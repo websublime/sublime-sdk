@@ -1,4 +1,4 @@
-# Essential
+# Globals
 
 Essential is a redux toolkit for window or node. Essential as a diferent approach to use redux, the concept is OOP. 
 
