@@ -6,6 +6,10 @@
  */
 import { EssentialLink, PayloadAction } from '@websublime/ws-essential';
 
+/**
+ * Environment link ID
+ * @public
+ */
 export const EnvironmentLinkID = { key: Symbol('environment') };
 
 type EnvironmentLinkState = {
@@ -13,6 +17,10 @@ type EnvironmentLinkState = {
   api: string | undefined;
 };
 
+/**
+ * Environment dispatchers
+ * @public
+ */
 export type EnvironmentDispatchers = {
   setApiUrl: (value: string) => void;
   setEnvironment: (value: string) => void;

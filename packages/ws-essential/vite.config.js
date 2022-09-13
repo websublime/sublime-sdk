@@ -3,7 +3,7 @@
 import path from 'node:path';
 
 import replace from '@rollup/plugin-replace';
-import { workspacesAlias } from '@websublime/vite';
+//import { workspacesAlias } from '@websublime/vite';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
 
@@ -61,8 +61,8 @@ module.exports = defineConfig({
     }),
     postcss({
       inject: false
-    }),
-    workspacesAlias(['../../'], ['vite'])
+    })
+    //workspacesAlias(['../../'], ['vite'])
   ],
   optimizeDeps: {
     include: ['@reduxjs/toolkit', 'redux']

@@ -1,6 +1,6 @@
 # Globals
 
-Essential is a redux toolkit for window or node. Essential as a diferent approach to use redux, the concept is OOP. 
+Globals create and initiate essential redux, register environement on store and creates a registry for packages/components.
 
 # Table of contents
 
@@ -11,69 +11,25 @@ Essential is a redux toolkit for window or node. Essential as a diferent approac
 
 # Usage
 
-The concept is to create a "Link" that will operate your redux actions/reducers. Every entry on the root state is connected to this link and the link instance is the responsable to produce changes on that slice state. Let's go by example. Let's took an example of publish messages. Let's create the Link first:
+Two main entries are added to the essential store: Environment and Registry. The links IDS are:
 
 ```
-import { PayloadAction, EssentialLink } from '@websublime/ws-essential';
-
-const BarLinkID = { key: Symbol('NAMESPACE-MESSAGES') };
-
-type BarState = { message: string };
-type BarDispatchers = {
-  publish: (payload: string) => void;
-};
-
-class BarLink extends EssentialLink<BarState> {
-  get initialState() {
-    return { message: '' };
-  }
-
-  protected definedActions() {
-    return {
-      publish: this.publish
-    };
-  }
-
-  private publish(state: BarState, action: PayloadAction<string>) {
-    state.message = action.payload;
-  }
-}
+Environment: EnvironmentLinkID
+Registry: RegistryLinkID
 ```
 
-Every link should have a unique and singleton id as seen on ```BarLinkID```, this will be used to identify your link, also your entry on root state redux. Also we type the state of our link and the dispatchers that will be public available. The ```get initialState()``` getter defines your initail/default state. Mutations to state are only allowed inside the reducer. The ```definedActions``` method is an hook where you should define your actions mapping the internal method that will be used as reducer/trigger. Like we see it on the above class, example:
+They are export on package to be consumed as npm if you need to subscribe. Environment is initiated and search on global scope (window) for the entries in window.environment.
 
-```
-protected definedActions() {
-  return {
-    publish: this.publish
+```ts
+interface Window {
+  environment: {
+    apiUrl: string;
+    env: string;
   };
 }
-
-private publish(state: BarState, action) {
-  state.message = action.payload;
-}
 ```
 
-It means, action ```publish``` will be created and the reducer ```this.publish``` will be used to change state. Also the typing ```<string>``` in action means that ```action.payload``` will be string type. Now our Link class is ready to be part of the store.
-
-```
-import { useStore, PayloadAction } from '@websublime/ws-essential';
-
-const store = useStore();
-
-store.addLink(new BarLink(BarLinkID));
-
-store.subscribe(BarLinkID, (state: BarState, action: PayloadAction<string>) => {
-  console.log(state.message);
-});
-
-const dispacther = store.getDispatchers<BarDispatchers>(BarLinkID);
-
-dispacther.publish('Hello World');
-```
-
-The ```store``` is a empty redux store, ready to accept links on it. Add your new slice state to the store by adding a link like: ```store.addLink(new BarLink(BarLinkID))```, now you can subscribe to changes that happen on that namespace and also get the dispatchers to make changes on the namespace state.
-
+Provide this values if you want or defaults will be used.
 
 
 [(Back to top)](#table-of-contents)
