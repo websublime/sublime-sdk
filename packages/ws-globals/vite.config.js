@@ -10,6 +10,11 @@ import { defineConfig } from 'vite';
 import { version } from './package.json';
 
 module.exports = defineConfig({
+  esbuild: {
+    minifyIdentifiers: false,
+    minifyWhitespace: true,
+    minifySyntax: true
+  },
   define: {
     Version: JSON.stringify(version),
     global: 'globalThis',

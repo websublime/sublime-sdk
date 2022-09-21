@@ -6,6 +6,8 @@
  */
 import { EssentialLink, PayloadAction } from '@websublime/ws-essential';
 
+import { version } from './version';
+
 /**
  * Environment link ID
  * @public
@@ -15,6 +17,7 @@ export const EnvironmentLinkID = { key: Symbol('environment') };
 type EnvironmentLinkState = {
   env: string;
   api: string | undefined;
+  version: string;
 };
 
 /**
@@ -30,7 +33,8 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
   get initialState() {
     return {
       api: undefined,
-      env: 'production'
+      env: 'production',
+      version
     };
   }
 

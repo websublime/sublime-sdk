@@ -13,18 +13,21 @@ import {
 } from './environment';
 import { RegistryLink, RegistryLinkID } from './registry';
 
+type Environment = {
+  apiUrl: string;
+  env: string;
+};
+
 declare global {
-  interface Window {
-    environment: {
-      apiUrl: string;
-      env: string;
-    };
-  }
+  var environment: Environment;
 }
 
-const initializeEnvironment = () => {
+const initializeEnvironment = (environment: Environment) => {
   // eslint-disable-next-line unicorn/prevent-abbreviations
-  const { apiUrl, env = 'production' } = window.environment || {};
+  const { apiUrl, env = 'production' } = {
+    ...window.environment,
+    ...environment
+  };
 
   const store = useStore({
     devTools: env !== 'production'
@@ -45,12 +48,10 @@ const initializeRegistry = () => {
   store.addLink(new RegistryLink(RegistryLinkID));
 };
 
-const boot = () => {
-  initializeEnvironment();
+export const bootGlobals = (environment: Environment = {} as Environment) => {
+  initializeEnvironment(environment);
   initializeRegistry();
 };
-
-boot();
 
 export { RegistryLinkID } from './registry';
 export { EnvironmentLinkID } from './environment';
