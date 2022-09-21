@@ -1,7 +1,7 @@
 {
   "name": "@websublime/ws-globals",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.0.0-SNAPSHOT-20220921225635",
   "source": "./src",
   "scripts": {
     "start": "vite --debug",
@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@websublime/vite": "0.0.1",
-    "@websublime/ws-essential": "^0.2.0",
+    "@websublime/ws-essential": "0.0.0-SNAPSHOT-20220921225635",
     "@microsoft/api-documenter": "^7.17.15",
     "@microsoft/api-extractor": "^7.24.1",
     "@types/jest": "^27.0.1",
