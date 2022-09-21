@@ -34,17 +34,14 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Test echo
-        run: |
-          git --no-pager diff --name-only origin/main HEAD
-          git rev-list --objects --all --count
-
       - name: Artifacts
         run: |
           wget https://github.com/websublime/sublime-cli/releases/download/v0.1.8/sublime-v0.1.8-linux-amd64.tar.gz
           tar -xf sublime-v0.1.8-linux-amd64.tar.gz sublime
           chmod +x sublime
           ./sublime action --type branch --env "$NODE_ENV"
+          rm -rf sublime-v0.1.8-linux-amd64.tar.gz
+          rm -rf sublime
 
       - name: Setup CI Git User
         run: |
@@ -61,7 +58,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn changeset version --snapshot SNAPSHOT
-          publish: changeset publish --no-git-tag --snapshot
+          publish: yarn changeset publish --no-git-tag --snapshot
           title: "chore(snapshot): Packages snapshots"
           commit: "chore(snapshot): releasing snapshot preview"
         env:
