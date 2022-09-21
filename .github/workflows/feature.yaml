@@ -45,3 +45,25 @@ jobs:
           tar -xf sublime-v0.1.8-linux-amd64.tar.gz sublime
           chmod +x sublime
           ./sublime action --type branch --env "$NODE_ENV"
+
+      - name: Setup CI Git User
+        run: |
+          git config --global user.name "miguelramos"
+          git config --global user.email "miguel.ramos@websublime.dev"
+          cat << EOF > "$HOME/.npmrc"
+            //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
+            @websublime:registry=https://npm.pkg.github.com
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Create Snapshot
+        uses: changesets/action@v1
+        with:
+          version: yarn changeset version --snapshot SNAPSHOT
+          publish: changeset publish --no-git-tag --snapshot
+          title: "chore(snapshot): version packages"
+          commit: "chore(release): version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GH_TOKEN }}
