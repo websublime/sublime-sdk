@@ -62,8 +62,8 @@ jobs:
         with:
           version: yarn changeset version --snapshot SNAPSHOT
           publish: changeset publish --no-git-tag --snapshot
-          title: "chore(snapshot): version packages"
-          commit: "chore(release): version packages"
+          title: "chore(snapshot): Packages snapshots"
+          commit: "chore(snapshot): releasing snapshot preview"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.GH_TOKEN }}
