@@ -3,13 +3,18 @@
 import path from 'node:path';
 
 import replace from '@rollup/plugin-replace';
-import { workspacesAlias } from '@websublime/vite';
+//import { workspacesAlias } from '@websublime/vite';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
 
 import { version } from './package.json';
 
 module.exports = defineConfig({
+  esbuild: {
+    minifyIdentifiers: false,
+    minifyWhitespace: true,
+    minifySyntax: true
+  },
   define: {
     Version: JSON.stringify(version),
     global: 'globalThis',
@@ -58,7 +63,7 @@ module.exports = defineConfig({
     }),
     postcss({
       inject: false
-    }),
-    workspacesAlias(['../../'], ['vite', '@websublime/ws-essential'])
+    })
+    //workspacesAlias(['../../'], ['vite', '@websublime/ws-essential'])
   ]
 });

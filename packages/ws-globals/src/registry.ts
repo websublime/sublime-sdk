@@ -6,6 +6,10 @@
  */
 import { EssentialLink, PayloadAction } from '@websublime/ws-essential';
 
+/**
+ * Registry link ID
+ * @public
+ */
 export const RegistryLinkID = { key: Symbol('registry') };
 
 type RegistryLinkState = {
@@ -14,6 +18,10 @@ type RegistryLinkState = {
   };
 };
 
+/**
+ * Registry dispatchers
+ * @public
+ */
 export type RegistryDispatchers = {
   add: (value: Record<string, { id: string }>) => void;
 };
