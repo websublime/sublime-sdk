@@ -27,6 +27,7 @@ type EnvironmentLinkState = {
 export type EnvironmentDispatchers = {
   setApiUrl: (value: string) => void;
   setEnvironment: (value: string) => void;
+  setOption: <AnyValue = Record<string, unknown>>(value: AnyValue) => void;
 };
 
 export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
@@ -41,7 +42,8 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
   protected definedActions() {
     return {
       setApiUrl: this.setApiUrl,
-      setEnvironment: this.setEnvironment
+      setEnvironment: this.setEnvironment,
+      setOption: this.setOption
     };
   }
 
@@ -57,5 +59,15 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
     action: PayloadAction<string>
   ) {
     state.api = action.payload;
+  }
+
+  private setOption(
+    state: EnvironmentLinkState,
+    payload: PayloadAction<Record<string, unknown>>
+  ) {
+    state = {
+      ...state,
+      ...payload
+    };
   }
 }

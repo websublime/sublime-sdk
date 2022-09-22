@@ -25,7 +25,7 @@ declare global {
 const initializeEnvironment = (environment: Environment) => {
   // eslint-disable-next-line unicorn/prevent-abbreviations
   const { apiUrl, env = 'production' } = {
-    ...window.environment,
+    ...global.environment,
     ...environment
   };
 
