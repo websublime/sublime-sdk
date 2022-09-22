@@ -1,5 +1,13 @@
 # @websublime/ws-essential
 
+## 0.3.0
+
+### Minor Changes
+
+- [#5](https://github.com/websublime/sublime-sdk/pull/5) [`aa0ce9a`](https://github.com/websublime/sublime-sdk/commit/aa0ce9a3a533a3a23e76ad156ce615ffae9b249f) Thanks [@miguelramos](https://github.com/miguelramos)! - Globals
+
+  Globals are two essential store links Environment and Registry. Environment to provide config/options and registry for particular components data.
+
 ## 0.2.0
 
 ### Minor Changes
