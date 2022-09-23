@@ -1,3 +1,5 @@
+global.window = Object.create(window);
+
 const localStorageMock = (function () {
   const store = {};
 
@@ -12,7 +14,7 @@ const localStorageMock = (function () {
       delete store[key];
     },
     setItem: function (key, value) {
-      store[key] = value.toString();
+      store[key] = JSON.stringify(value);
     }
   };
 })();

@@ -85,11 +85,13 @@ export abstract class EssentialLink<State extends AnyState = any>
   constructor(key: SymbolID) {
     this.namespace = key;
 
-    this.initSlice();
-
     if (this.bootstrap) {
       this.bootstrap();
     }
+  }
+
+  public async initialize() {
+    await this.initSlice();
   }
 
   /**
@@ -109,7 +111,7 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Creates and initialize state slice
    * @internal
    */
-  protected initSlice() {
+  protected async initSlice() {
     const { initialState, namespace, sliceProps } = this;
     const reducers = this.definedActions();
 

@@ -76,13 +76,17 @@ export class EssentialStore {
    * from redux store.
    * @public
    */
-  public addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
+  public async addLink<Link extends EssentialLink>(
+    link: InstanceType<Class<Link>>
+  ) {
     const { dispatch } = this.store;
 
     Object.defineProperty(link, 'dispatch', {
       value: dispatch,
       writable: false
     });
+
+    await link.initialize();
 
     const linkReducer = { [link.namespace.key.toString()]: link.reducer };
     const cachedEntries = this.getLinkReducers();
@@ -114,7 +118,7 @@ export class EssentialStore {
    * Subscribe to slice changes.
    * @public
    */
-  public subscribe(
+  public async subscribe(
     linkID: SymbolID,
     callback: (state: any, action: AnyAction) => void,
     priority = 1
@@ -131,7 +135,7 @@ export class EssentialStore {
    * Subscribe only once to slice changes.
    * @public
    */
-  public once(
+  public async once(
     linkID: SymbolID,
     callback: (state: any, action: AnyAction) => void,
     priority = 1

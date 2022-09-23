@@ -12,7 +12,7 @@ describe('> Link to EssentialStore', () => {
     });
   });
 
-  test('# It should create a essential link class', () => {
+  test('# It should create a essential link class', async () => {
     const FooLinkID = { key: Symbol(nanoid()) };
 
     type FooState = { count: number };
@@ -46,8 +46,8 @@ describe('> Link to EssentialStore', () => {
 
     const fooLink = new FooLink(FooLinkID);
 
-    store.addLink(fooLink);
-    store.subscribe(FooLinkID, (state: FooState) => {
+    await store.addLink(fooLink);
+    await store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
     });
 
@@ -106,7 +106,7 @@ describe('> Link to EssentialStore', () => {
     const spyChange = jest.spyOn(FooLink.prototype, 'change');
     const fooLink = new FooLink(FooLinkID);
 
-    store.addLink(fooLink);
+    await store.addLink(fooLink);
     const { decrement } = store.getDispatchers<FooDispatchers>(FooLinkID);
 
     decrement(1);
@@ -178,14 +178,14 @@ describe('> Link to EssentialStore', () => {
     const fooLink = new FooLink(FooLinkID);
     const barLink = new BarLink(BarLinkID);
 
-    store.addLink(fooLink);
-    store.addLink(barLink);
+    await store.addLink(fooLink);
+    await store.addLink(barLink);
 
-    store.subscribe(FooLinkID, (state: FooState) => {
+    await store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
     });
 
-    store.subscribe(BarLinkID, (state: BarState) => {
+    await store.subscribe(BarLinkID, (state: BarState) => {
       expect(state).toEqual({ message: 'Hello World' });
     });
 

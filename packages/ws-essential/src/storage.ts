@@ -19,7 +19,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
 
   private persistence!: Storage;
 
-  private get name() {
+  private get storageName() {
     return `ws:${this.namespace.key.toString()}`;
   }
 
@@ -28,11 +28,9 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
 
     switch (this.storage) {
       case EssentialStorage.LOCAL: {
-        driver = localStorageDriver({
-          base: this.name,
-          localStorage: global.Storage,
-          window: global.Window
-        });
+        driver = localStorageDriver();
+
+        break;
       }
       default: {
         driver = memoryDriver();
@@ -45,7 +43,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   }
 
   public change(_oldState: State, newState: State, _action: AnyAction): void {
-    this.persistence.setItem('', JSON.stringify(newState));
+    this.persistence.setItem(this.storageName, JSON.stringify(newState));
   }
 
   /**
@@ -55,7 +53,9 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   protected async initSlice() {
     this.setupStore();
 
-    const persistedState = (await this.persistence.getItem(this.name)) as State;
+    const persistedState = (await this.persistence.getItem(
+      this.storageName
+    )) as State;
 
     const { initialState, namespace, sliceProps } = this;
     const reducers = this.definedActions();

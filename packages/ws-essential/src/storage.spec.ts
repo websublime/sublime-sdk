@@ -13,8 +13,9 @@ describe('> Link to EssentialStore', () => {
     });
   });
 
-  test('# It should create a essential storage link class', () => {
-    const spySetItem = jest.spyOn(global.Storage.prototype, 'setItem');
+  test('# It should create a essential storage with persisted state', async () => {
+    //const spySetItem = jest.spyOn(global.Storage.prototype, 'setItem');
+    const spyGetItem = jest.spyOn(global.localStorage, 'getItem');
 
     const FooLinkID = { key: Symbol(nanoid()) };
 
@@ -53,10 +54,13 @@ describe('> Link to EssentialStore', () => {
 
     const fooLink = new FooLink(FooLinkID);
 
-    store.addLink(fooLink);
-    store.subscribe(FooLinkID, (state: FooState) => {
-      expect(state).toEqual({ count: 1 });
-      expect(spySetItem).toHaveBeenCalled();
+    spyGetItem.mockImplementationOnce(() => {
+      return JSON.stringify({ count: 1 });
+    });
+
+    await store.addLink(fooLink);
+    await store.subscribe(FooLinkID, (state: FooState) => {
+      expect(state).toEqual({ count: 2 });
     });
 
     const { increment } = store.getDispatchers<FooDispatchers>(FooLinkID);
