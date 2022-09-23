@@ -14,7 +14,9 @@ import type { AnyState, Essential, ReducerFunction, SymbolID } from './types';
  * Essential link is a link slcie constructor to expose dispatcher on slice state
  * @public
  */
-export abstract class EssentialLink<State extends AnyState = any> implements Essential<State> {
+export abstract class EssentialLink<State extends AnyState = any>
+  implements Essential<State>
+{
   /**
    * Slice initial state
    * @public
@@ -43,7 +45,7 @@ export abstract class EssentialLink<State extends AnyState = any> implements Ess
    * Slice descriptor properties
    * @internal
    */
-  private sliceProps = new WeakMap<SymbolID, Slice<State>>();
+  protected sliceProps = new WeakMap<SymbolID, Slice<State>>();
 
   /**
    * Public dispatchers
@@ -107,13 +109,13 @@ export abstract class EssentialLink<State extends AnyState = any> implements Ess
    * Creates and initialize state slice
    * @internal
    */
-  private initSlice() {
+  protected initSlice() {
     const { initialState, namespace, sliceProps } = this;
     const reducers = this.definedActions();
 
     const slice = createSlice({
-      extraReducers: builder => {
-        builder.addDefaultCase(state => {
+      extraReducers: (builder) => {
+        builder.addDefaultCase((state) => {
           return state;
         });
       },

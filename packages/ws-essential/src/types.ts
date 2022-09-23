@@ -16,7 +16,10 @@ export type Class<Proto = unknown> = new (...arguments_: any[]) => Proto;
 // eslint-disable-next-line prettier/prettier
 export type Abstract<Proto = unknown> = abstract new (...arguments_: any[]) => Proto;
 
-export type ReducerFunction = <T extends {type: string, payload: any }>(state: any, action:T) => void;
+export type ReducerFunction = <T extends { type: string; payload: any }>(
+  state: any,
+  action: T
+) => void;
 
 export type LinkEntries<T extends Essential<AnyState>> = {
   link: InstanceType<Class<T>>;
@@ -40,3 +43,12 @@ export interface Essential<State> {
   readonly actions: Record<string, any>;
   change?: (oldState: State, newState: State, action: AnyAction) => void;
 }
+
+export const EssentialStorage = {
+  LOCAL: 'localStorage',
+  MEMORY: 'memory'
+} as const;
+
+type EssentialStorageKey = keyof typeof EssentialStorage;
+
+export type EssentialStorageType = typeof EssentialStorage[EssentialStorageKey];

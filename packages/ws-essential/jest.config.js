@@ -32,7 +32,7 @@ module.exports = {
   },
   rootDir: '.',
   roots: ['<rootDir>'],
-  // setupFilesAfterEnv: ['./jest.setup.js'],
+  setupFilesAfterEnv: ['./jest.setup.js'],
   testMatch: ['<rootDir>/src/**/*.spec.(js|jsx|ts|tsx)'],
   transform: {
     '\\.(ts|tsx)$': 'ts-jest'

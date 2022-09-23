@@ -50,16 +50,19 @@ export class EssentialStore {
   private listenerMiddleware: ReturnType<typeof createListenerMiddleware>;
 
   constructor(options: Partial<ConfigureStoreOptions>) {
-    const rootReducer = createReducer<Record<string, unknown>>({}, builder => {
-      builder.addDefaultCase(state => {
-        return state;
-      });
-    });
+    const rootReducer = createReducer<Record<string, unknown>>(
+      {},
+      (builder) => {
+        builder.addDefaultCase((state) => {
+          return state;
+        });
+      }
+    );
 
     this.listenerMiddleware = createListenerMiddleware();
 
     this.store = configureStore({
-      middleware: getDefaultMiddleware =>
+      middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
           serializableCheck: false
         }).prepend(this.listenerMiddleware.middleware),
@@ -73,9 +76,7 @@ export class EssentialStore {
    * from redux store.
    * @public
    */
-  public addLink<Link extends EssentialLink>(
-    link: InstanceType<Class<Link>>
-  ) {
+  public addLink<Link extends EssentialLink>(link: InstanceType<Class<Link>>) {
     const { dispatch } = this.store;
 
     Object.defineProperty(link, 'dispatch', {
@@ -104,9 +105,7 @@ export class EssentialStore {
    * Get Link api dispatchers to trigger.
    * @public
    */
-  public getDispatchers<Dispatchers>(
-    linkID: SymbolID
-  ): Dispatchers {
+  public getDispatchers<Dispatchers>(linkID: SymbolID): Dispatchers {
     const entry = this.links.get(linkID) as LinkEntries<EssentialLink>;
     return entry.link.dispatchers as Dispatchers;
   }
@@ -157,9 +156,8 @@ export class EssentialStore {
         const { [stateName]: state } = listenerApi.getState() as any;
 
         if (link.change) {
-          const {
-            [stateName]: oldState
-          } = listenerApi.getOriginalState() as any;
+          const { [stateName]: oldState } =
+            listenerApi.getOriginalState() as any;
 
           link.change(oldState, state, action);
         }
@@ -213,8 +211,8 @@ export class EssentialStore {
     //@TODO: remove ids from cache
     if (linkEntries) {
       linkEntries.listeners = id
-        ? linkEntries.listeners.filter(listener => listener.id !== id)
-        : linkEntries.listeners.filter(listener => listener.once === false);
+        ? linkEntries.listeners.filter((listener) => listener.id !== id)
+        : linkEntries.listeners.filter((listener) => listener.once === false);
 
       this.links.set(linkID, linkEntries);
     }

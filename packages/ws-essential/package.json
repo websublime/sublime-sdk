@@ -9,7 +9,7 @@
     "dts": "tsc --declaration --emitDeclarationOnly",
     "types": "mkdir dist/docs && api-extractor run --local && rm -rf ./declarations",
     "release": "yarn changeset publish",
-    "test": "jest --verbose --no-cache -i",
+    "test": "jest --verbose --no-cache -i --env=jsdom",
     "test:debug": "NODE_ENV=local node --inspect $(npm bin)/jest --no-cache --runInBand"
   },
   "devDependencies": {
@@ -36,7 +36,8 @@
     "ts-jest": "^28.0.7",
     "typescript": "^4.5.4",
     "vite": "^3.0.2",
-    "@reduxjs/toolkit": "^1.8.1"
+    "@reduxjs/toolkit": "^1.8.1",
+    "unstorage": "^0.5.6"
   },
   "dependencies": {},
   "main": "./dist/ws-essential.cjs.js",
