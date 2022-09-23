@@ -1,5 +1,11 @@
 # @websublime/ws-globals
 
+## 0.0.0-SNAPSHOT-20220923224245
+
+### Minor Changes
+
+- [`584344f`](https://github.com/websublime/sublime-sdk/commit/584344f724cb5ff9ed3f03e2e9812fcce5add230) Thanks [@miguelramos](https://github.com/miguelramos)! - Storage snapshot
+
 ## 0.2.0
 
 ### Minor Changes
