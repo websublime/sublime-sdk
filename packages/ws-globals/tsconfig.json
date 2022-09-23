@@ -7,7 +7,7 @@
       "importHelpers": true,
       "inlineSources": true,
       "isolatedModules": true,
-      "lib": ["es2017", "dom", "dom.iterable"],
+      "lib": ["esnext", "dom", "dom.iterable"],
       "module": "esNext",
       "moduleResolution": "node",
       "noImplicitReturns": true,
@@ -18,7 +18,7 @@
       "skipLibCheck": true,
       "strict": true,
       "sourceMap": true,
-      "target": "es2017",
+      "target": "esnext",
       "baseUrl": ".",
       "paths": {
         "*": ["./types/*", "*"],
