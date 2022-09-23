@@ -45,7 +45,7 @@ const initializeEnvironment = async (environment: Environment) => {
 const initializeRegistry = async () => {
   const store = useStore();
 
-  store.addLink(new RegistryLink(RegistryLinkID));
+  await store.addLink(new RegistryLink(RegistryLinkID));
 };
 
 export const bootGlobals = async (
