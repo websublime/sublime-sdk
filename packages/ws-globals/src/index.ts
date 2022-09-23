@@ -22,7 +22,7 @@ declare global {
   var environment: Environment;
 }
 
-const initializeEnvironment = (environment: Environment) => {
+const initializeEnvironment = async (environment: Environment) => {
   // eslint-disable-next-line unicorn/prevent-abbreviations
   const { apiUrl, env = 'production' } = {
     ...global.environment,
@@ -33,7 +33,7 @@ const initializeEnvironment = (environment: Environment) => {
     devTools: env !== 'production'
   });
 
-  store.addLink(new EnvironmentLink(EnvironmentLinkID));
+  await store.addLink(new EnvironmentLink(EnvironmentLinkID));
 
   const { setApiUrl, setEnvironment } =
     store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
@@ -42,15 +42,16 @@ const initializeEnvironment = (environment: Environment) => {
   setEnvironment(env);
 };
 
-const initializeRegistry = () => {
+const initializeRegistry = async () => {
   const store = useStore();
 
   store.addLink(new RegistryLink(RegistryLinkID));
 };
 
-export const bootGlobals = (environment: Environment = {} as Environment) => {
-  initializeEnvironment(environment);
-  initializeRegistry();
+export const bootGlobals = async (
+  environment: Environment = {} as Environment
+) => {
+  return initializeEnvironment(environment).then(() => initializeRegistry());
 };
 
 export { RegistryLinkID } from './registry';
