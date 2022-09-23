@@ -1,3 +1,9 @@
+/**
+ * Copyright Websublime All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://websublime.dev/license
+ */
 import { AnyAction, createSlice } from '@reduxjs/toolkit';
 import { Storage, createStorage } from 'unstorage';
 import localStorageDriver from 'unstorage/drivers/localstorage';
@@ -19,7 +25,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
 
   private persistence!: Storage;
 
-  private get storageName() {
+  get storageName() {
     return `ws:${this.namespace.key.toString()}`;
   }
 
@@ -43,7 +49,8 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   }
 
   public change(_oldState: State, newState: State, _action: AnyAction): void {
-    this.persistence.setItem(this.storageName, JSON.stringify(newState));
+    debugger;
+    this.persistence.setItem(this.storageName, newState as any);
   }
 
   /**
