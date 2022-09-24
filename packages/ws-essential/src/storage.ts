@@ -49,7 +49,6 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   }
 
   public change(_oldState: State, newState: State, _action: AnyAction): void {
-    debugger;
     this.persistence.setItem(this.storageName, newState as any);
   }
 
