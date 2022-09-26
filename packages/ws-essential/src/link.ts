@@ -97,7 +97,11 @@ export abstract class EssentialLink<State extends AnyState = any>
   /**
    * Hook on any sate change
    */
-  public change?(oldState: State, newState: State, action: AnyAction): void;
+  public async change?(
+    oldState: State,
+    newState: State,
+    action: AnyAction
+  ): Promise<void>;
 
   /**
    * Dispatch actions

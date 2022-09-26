@@ -47,7 +47,7 @@ describe('> Link to EssentialStore', () => {
     const fooLink = new FooLink(FooLinkID);
 
     await store.addLink(fooLink);
-    await store.subscribe(FooLinkID, (state: FooState) => {
+    store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
     });
 
@@ -89,7 +89,7 @@ describe('> Link to EssentialStore', () => {
         state.count = state.count - action.payload;
       }
 
-      public change(
+      public async change(
         oldState: FooState,
         newState: FooState,
         action: PayloadAction<any>
@@ -181,11 +181,11 @@ describe('> Link to EssentialStore', () => {
     await store.addLink(fooLink);
     await store.addLink(barLink);
 
-    await store.subscribe(FooLinkID, (state: FooState) => {
+    store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
     });
 
-    await store.subscribe(BarLinkID, (state: BarState) => {
+    store.subscribe(BarLinkID, (state: BarState) => {
       expect(state).toEqual({ message: 'Hello World' });
     });
 

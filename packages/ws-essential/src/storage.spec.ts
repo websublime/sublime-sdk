@@ -58,7 +58,8 @@ describe('> Link to EssentialStore', () => {
     });
 
     await store.addLink(fooLink);
-    await store.subscribe(FooLinkID, (state: FooState) => {
+
+    store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 2 });
     });
 
@@ -108,7 +109,10 @@ describe('> Link to EssentialStore', () => {
     const fooLink = new FooLink(FooLinkID);
 
     await store.addLink(fooLink);
-    await store.subscribe(FooLinkID, (state: FooState) => {
+
+    store.subscribe(FooLinkID, (state: FooState) => {
+      expect(state.count).toEqual(1);
+
       setTimeout(() => {
         const local = JSON.parse(
           localStorage.getItem(fooLink.storageName) as any

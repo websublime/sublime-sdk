@@ -72,6 +72,15 @@ export class EssentialStore {
   }
 
   /**
+   * Check if link is registered
+   *
+   * @public
+   */
+  public linkExists(linkID: SymbolID): boolean {
+    return this.links.has(linkID);
+  }
+
+  /**
    * Add links to registry and patch dispatch
    * from redux store.
    * @public
@@ -118,7 +127,7 @@ export class EssentialStore {
    * Subscribe to slice changes.
    * @public
    */
-  public async subscribe(
+  public subscribe(
     linkID: SymbolID,
     callback: (state: any, action: AnyAction) => void,
     priority = 1
@@ -163,7 +172,7 @@ export class EssentialStore {
           const { [stateName]: oldState } =
             listenerApi.getOriginalState() as any;
 
-          link.change(oldState, state, action);
+          await link.change(oldState, state, action);
         }
 
         const callbacks = listeners
