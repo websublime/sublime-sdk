@@ -46,7 +46,8 @@ export interface Essential<State> {
 
 export const EssentialStorage = {
   LOCAL: 'localStorage',
-  MEMORY: 'memory'
+  MEMORY: 'memory',
+  SESSION: 'session'
 } as const;
 
 type EssentialStorageKey = keyof typeof EssentialStorage;

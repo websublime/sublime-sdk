@@ -38,6 +38,13 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
 
         break;
       }
+      case EssentialStorage.SESSION: {
+        driver = localStorageDriver({
+          localStorage: window.sessionStorage
+        });
+
+        break;
+      }
       default: {
         driver = memoryDriver();
       }
