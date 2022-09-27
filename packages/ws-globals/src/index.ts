@@ -35,11 +35,10 @@ const initializeEnvironment = async (environment: Environment) => {
 
   await store.addLink(new EnvironmentLink(EnvironmentLinkID));
 
-  const { setApiUrl, setEnvironment } =
+  const { add } =
     store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
 
-  setApiUrl(apiUrl);
-  setEnvironment(env);
+  add({ api: apiUrl, env });
 };
 
 const initializeRegistry = async () => {

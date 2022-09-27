@@ -35,6 +35,10 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   public namespace: SymbolID;
 
+  /**
+   * Public functions to mutate state
+   * @public
+   */
   public abstract getDispatchers(): Record<string, Function>;
 
   /**
@@ -55,11 +59,16 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   protected sliceProps = new WeakMap<SymbolID, Slice<State>>();
 
+  /**
+   * Reference to original store.dispatch
+   * @internal
+   */
   private _dispatch!: Dispatch<AnyAction>;
 
   /**
    * Public main reducer
    * @readonly
+   * @internal
    */
   get reducer() {
     const properties = this.sliceProps.get(this.namespace) as Slice<State>;
@@ -67,30 +76,25 @@ export abstract class EssentialLink<State extends AnyState = any>
     return properties.reducer;
   }
 
-  /**
-   * Public actions
-   * @readonly
-   */
-  get actions() {
-    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
-
-    return properties.actions;
-  }
-
   constructor(key: SymbolID) {
     this.namespace = key;
+  }
 
+  /**
+   * Create redux slice and call hook
+   * @internal
+   */
+  public async initialize() {
     if (this.onCreate) {
       this.onCreate();
     }
-  }
 
-  public async initialize() {
     await this.initSlice();
   }
 
   /**
    * Hook on any slice state change
+   * @public
    */
   public async onChange?(
     oldState: State,
@@ -98,12 +102,32 @@ export abstract class EssentialLink<State extends AnyState = any>
     action: AnyAction
   ): Promise<void>;
 
+  /**
+   * Verify if action key exists
+   * @public
+   */
+  public hasActionType(key: string) {
+    const hasNamespace = key.includes(this.namespace.key.description as string);
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+    const actionKey = hasNamespace
+      ? key
+      : `${this.namespace.key.description}/${key}`;
+
+    return Object.entries(properties.actions).some(
+      ([_key, property]) => property.type === actionKey
+    );
+  }
+
+  /**
+   * Get action refrence for the reducer
+   * @public
+   */
   protected getActionType(key: string) {
-    const id = `${this.namespace.key.toString()}/${key}`;
+    const id = `${this.namespace.key.description}/${key}`;
     const properties = this.sliceProps.get(this.namespace) as Slice<State>;
 
     const action = Object.entries(properties.actions).find(
-      ([_key, property]) => property.toString() === id
+      ([_key, property]) => property.type === id
     );
 
     if (!action) {
@@ -116,10 +140,10 @@ export abstract class EssentialLink<State extends AnyState = any>
 
   /**
    * Dispatch actions
-   * @internal
+   * @public
    */
   protected dispatch<Payload = any>(
-    action: ActionCreatorWithPayload<any, string>,
+    action: ActionCreatorWithPayload<Payload, string>,
     payload: Payload
   ) {
     this._dispatch(action(payload));
@@ -140,7 +164,7 @@ export abstract class EssentialLink<State extends AnyState = any>
         });
       },
       initialState,
-      name: namespace.key.toString(),
+      name: namespace.key.description as string,
       reducers
     });
 

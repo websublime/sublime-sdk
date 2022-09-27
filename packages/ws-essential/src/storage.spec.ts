@@ -1,10 +1,10 @@
-import { PayloadAction, nanoid } from '@reduxjs/toolkit';
+import { PayloadAction } from '@reduxjs/toolkit';
 
+import { createSymbolID } from './helpers';
 import { EssentialLinkStorage } from './storage';
 import { EssentialStore } from './store';
 import { EssentialStorage } from './types';
 
-/*
 describe('> Link to EssentialLinkStorage', () => {
   let store: EssentialStore;
 
@@ -12,12 +12,16 @@ describe('> Link to EssentialLinkStorage', () => {
     store = new EssentialStore({
       devTools: true
     });
+
+    globalThis.localStorage.clear();
   });
 
   test('# It should create a essential storage with persisted state', async () => {
-    const spyGetItem = jest.spyOn(global.localStorage, 'getItem');
+    const spyGetItem = jest.spyOn(globalThis.localStorage, 'getItem');
 
-    const FooLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
     type FooDispatchers = {
@@ -36,19 +40,32 @@ describe('> Link to EssentialLinkStorage', () => {
         return EssentialStorage.LOCAL;
       }
 
-      protected definedReducers() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
@@ -72,7 +89,9 @@ describe('> Link to EssentialLinkStorage', () => {
   });
 
   test('# It should update and use localStorage on link change', async () => {
-    const FooLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
     type FooDispatchers = {
@@ -91,19 +110,32 @@ describe('> Link to EssentialLinkStorage', () => {
         return EssentialStorage.LOCAL;
       }
 
-      protected definedReducers() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
@@ -128,7 +160,9 @@ describe('> Link to EssentialLinkStorage', () => {
   });
 
   test('# It should update and use sessionStorage on link change', async () => {
-    const FooLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
     type FooDispatchers = {
@@ -147,19 +181,32 @@ describe('> Link to EssentialLinkStorage', () => {
         return EssentialStorage.SESSION;
       }
 
-      protected definedReducers() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
@@ -183,4 +230,3 @@ describe('> Link to EssentialLinkStorage', () => {
     increment(1);
   });
 });
-*/

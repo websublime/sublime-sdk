@@ -4,7 +4,11 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
-import { EssentialLink, PayloadAction } from '@websublime/ws-essential';
+import {
+  EssentialLink,
+  PayloadAction,
+  createSymbolID
+} from '@websublime/ws-essential';
 
 import { version } from './version';
 
@@ -12,22 +16,25 @@ import { version } from './version';
  * Environment link ID
  * @public
  */
-export const EnvironmentLinkID = { key: Symbol('environment') };
+export const EnvironmentLinkID = createSymbolID('ENVIRONMENT');
 
 type EnvironmentLinkState = {
   env: string;
   api: string | undefined;
   version: string;
+  [key: string]: unknown;
 };
+
+const SET_OPTION = 'SET_OPTION';
+const RESET = 'RESET';
 
 /**
  * Environment dispatchers
  * @public
  */
 export type EnvironmentDispatchers = {
-  setApiUrl: (value: string) => void;
-  setEnvironment: (value: string) => void;
-  setOption: <AnyValue = Record<string, unknown>>(value: AnyValue) => void;
+  add: <AnyValue = Record<string, unknown>>(value: AnyValue) => void;
+  reset: () => void;
 };
 
 export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
@@ -39,35 +46,31 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
     };
   }
 
-  protected definedReducers() {
+  getDispatchers() {
     return {
-      setApiUrl: this.setApiUrl,
-      setEnvironment: this.setEnvironment,
-      setOption: this.setOption
+      add: (value: Record<string, { id: string }>) => {
+        this.dispatch(this.getActionType(SET_OPTION), value);
+      },
+      reset: () => {
+        this.dispatch(this.getActionType(RESET), {});
+      }
     };
   }
 
-  private setEnvironment(
-    state: EnvironmentLinkState,
-    action: PayloadAction<string>
-  ) {
-    state.env = action.payload;
-  }
-
-  private setApiUrl(
-    state: EnvironmentLinkState,
-    action: PayloadAction<string>
-  ) {
-    state.api = action.payload;
-  }
-
-  private setOption(
-    state: EnvironmentLinkState,
-    payload: PayloadAction<Record<string, unknown>>
-  ) {
-    state = {
-      ...state,
-      ...payload
+  protected getReducers() {
+    return {
+      [RESET]: (_state: EnvironmentLinkState, action: PayloadAction<any>) => {
+        _state = action.payload;
+      },
+      [SET_OPTION]: (
+        state: EnvironmentLinkState,
+        action: PayloadAction<Record<string, any>>
+      ) => {
+        state = {
+          ...state,
+          ...action.payload
+        };
+      }
     };
   }
 }

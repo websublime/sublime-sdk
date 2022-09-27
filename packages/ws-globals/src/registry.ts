@@ -4,19 +4,25 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
-import { EssentialLink, PayloadAction } from '@websublime/ws-essential';
+import {
+  EssentialLink,
+  PayloadAction,
+  createSymbolID
+} from '@websublime/ws-essential';
 
 /**
  * Registry link ID
  * @public
  */
-export const RegistryLinkID = { key: Symbol('registry') };
+export const RegistryLinkID = createSymbolID('REGISTRY');
 
 type RegistryLinkState = {
   [key: string]: {
     id: string;
   };
 };
+
+const SET_REGISTRY = 'SET_REGISTRY';
 
 /**
  * Registry dispatchers
@@ -31,19 +37,25 @@ export class RegistryLink extends EssentialLink<RegistryLinkState> {
     return {};
   }
 
-  protected definedReducers() {
+  getDispatchers() {
     return {
-      add: this.add
+      add: (value: Record<string, { id: string }>) => {
+        this.dispatch(this.getActionType(SET_REGISTRY), value);
+      }
     };
   }
 
-  private add(
-    state: RegistryLinkState,
-    action: PayloadAction<Record<string, { id: string }>>
-  ) {
-    state = {
-      ...state,
-      ...action.payload
+  protected getReducers() {
+    return {
+      [SET_REGISTRY]: (
+        state: RegistryLinkState,
+        action: PayloadAction<Record<string, { id: string }>>
+      ) => {
+        state = {
+          ...state,
+          ...action.payload
+        };
+      }
     };
   }
 }

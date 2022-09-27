@@ -40,7 +40,6 @@ export interface Essential<State> {
   //readonly dispatchers: unknown;
   readonly initialState: State;
   readonly reducer: any;
-  readonly actions: Record<string, any>;
   onChange?: (oldState: State, newState: State, action: AnyAction) => void;
 }
 

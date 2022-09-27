@@ -56,6 +56,7 @@ export { nanoid } from '@reduxjs/toolkit';
 export { EssentialLink } from './link';
 export { EssentialLinkStorage } from './storage';
 export { EssentialStorage } from './types';
+export { createSymbolID } from './helpers';
 // eslint-disable-next-line prettier/prettier
 export type { PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line prettier/prettier

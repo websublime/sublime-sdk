@@ -98,7 +98,9 @@ export class EssentialStore {
 
     await link.initialize();
 
-    const linkReducer = { [link.namespace.key.toString()]: link.reducer };
+    const linkReducer = {
+      [link.namespace.key.description as string]: link.reducer
+    };
     const cachedEntries = this.getLinkReducers();
 
     this.store.replaceReducer(
@@ -166,7 +168,7 @@ export class EssentialStore {
     this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
         const { listeners } = this.links.get(link.namespace) || {};
-        const stateName: string = link.namespace.key.toString();
+        const stateName: string = link.namespace.key.description as string;
         const { [stateName]: state } = listenerApi.getState() as any;
 
         if (link.onChange) {
@@ -193,9 +195,7 @@ export class EssentialStore {
         this.removeListener(link.namespace);
       },
       predicate: (action, _currentState: unknown) => {
-        const actions = Object.entries(link.actions);
-
-        return actions.some(([_key, item]) => item.type === action.type);
+        return link.hasActionType(action.type);
       }
     });
   }
@@ -211,7 +211,7 @@ export class EssentialStore {
 
       return {
         ...accumulator,
-        [entry.link.namespace.key.toString()]: entry.link.reducer
+        [entry.link.namespace.key.description as string]: entry.link.reducer
       };
     }, {});
   }

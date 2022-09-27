@@ -5,10 +5,16 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 import { EssentialLink } from './link';
+import { EssentialLinkStorage } from './storage';
 
-import { PayloadAction, useStore } from './index';
+import {
+  EssentialStorage,
+  PayloadAction,
+  createSymbolID,
+  useStore
+} from './index';
 
-document.addEventListener('readystatechange', function() {
+document.addEventListener('readystatechange', function () {
   const state = document.readyState;
 
   if (state == 'interactive') {
@@ -19,13 +25,17 @@ document.addEventListener('readystatechange', function() {
   }
 });
 
-function init() {
+async function init() {
   const store = useStore({
     devTools: true
   });
 
-  const FooLinkID = { key: Symbol('FOO-NAMESPACE') };
-  const BarLinkID = { key: Symbol('BAR-NAMESPACE') };
+  const FooLinkID = createSymbolID('FOO-LINK');
+  const ACTION_DECREMENT = 'ACTION_DECREMENT';
+  const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+  const BarLinkID = createSymbolID('BAR-LINK');
+  const ACTION_PUBLISH = 'ACTION_PUBLISH';
 
   type FooState = { count: number };
   type FooDispatchers = {
@@ -33,7 +43,7 @@ function init() {
     decrement: (payload: number) => void;
   };
 
-  type BarState = { message: string };
+  type BarState = { history: string[]; message: string };
   type BarDispatchers = {
     publish: (payload: string) => void;
   };
@@ -44,45 +54,68 @@ function init() {
       return { count: 0 };
     }
 
-    protected definedActions() {
+    getDispatchers() {
       return {
-        decrement: this.decrement,
-        increment: this.increment
+        decrement: (value: number) => {
+          this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+        },
+        increment: (value: number) => {
+          this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+        }
       };
     }
 
-    private increment(state: FooState, action: PayloadAction<number>) {
-      state.count = state.count + action.payload;
-    }
-
-    private decrement(state: FooState, action: PayloadAction<number>) {
-      state.count = state.count - action.payload;
+    protected getReducers() {
+      return {
+        [ACTION_DECREMENT]: (
+          state: FooState,
+          action: PayloadAction<number>
+        ) => {
+          state.count = state.count - action.payload;
+        },
+        [ACTION_INCREMENT]: (
+          state: FooState,
+          action: PayloadAction<number>
+        ) => {
+          state.count = state.count + action.payload;
+        }
+      };
     }
   }
 
   // BARLINK
-  class BarLink extends EssentialLink<BarState> {
+  class BarLink extends EssentialLinkStorage<BarState> {
     get initialState() {
-      return { message: '' };
+      return { history: [], message: '' };
     }
 
-    protected definedActions() {
+    get storage() {
+      return EssentialStorage.SESSION;
+    }
+
+    getDispatchers() {
       return {
-        publish: this.publish
+        publish: (value: string) => {
+          this.dispatch(this.getActionType(ACTION_PUBLISH), value);
+        }
       };
     }
 
-    private publish(state: BarState, action: PayloadAction<string>) {
-      state.message = action.payload;
+    protected getReducers() {
+      return {
+        [ACTION_PUBLISH]: (state: BarState, action: PayloadAction<string>) => {
+          state.message = action.payload;
+          state.history.push(action.payload);
+        }
+      };
     }
   }
 
-  store.addLink(new FooLink(FooLinkID));
-  store.addLink(new BarLink(BarLinkID));
+  await store.addLink(new FooLink(FooLinkID));
+  await store.addLink(new BarLink(BarLinkID));
 
-  const { decrement, increment } = store.getDispatchers<FooDispatchers>(
-    FooLinkID
-  );
+  const { decrement, increment } =
+    store.getDispatchers<FooDispatchers>(FooLinkID);
   const { publish } = store.getDispatchers<BarDispatchers>(BarLinkID);
 
   store.subscribe(FooLinkID, (state: FooState) => {

@@ -26,7 +26,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   private persistence!: Storage;
 
   get storageName() {
-    return `ws:${this.namespace.key.toString()}`;
+    return `ws:${this.namespace.key.description}`;
   }
 
   public async onChange(
@@ -77,7 +77,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     )) as State;
 
     const { initialState, namespace, sliceProps } = this;
-    const reducers = this.definedReducers();
+    const reducers = this.getReducers();
 
     const slice = createSlice({
       extraReducers: (builder) => {
@@ -86,7 +86,7 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
         });
       },
       initialState: persistedState || initialState,
-      name: namespace.key.toString(),
+      name: namespace.key.description as string,
       reducers
     });
 

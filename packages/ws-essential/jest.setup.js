@@ -1,7 +1,7 @@
 global.window = Object.create(window);
 
 const storageMock = (function () {
-  const store = {};
+  let store = {};
 
   return {
     clear: function () {
