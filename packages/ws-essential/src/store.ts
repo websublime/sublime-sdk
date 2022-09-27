@@ -90,7 +90,8 @@ export class EssentialStore {
   ) {
     const { dispatch } = this.store;
 
-    Object.defineProperty(link, 'dispatch', {
+    Object.defineProperty(link, '_dispatch', {
+      enumerable: false,
       value: dispatch,
       writable: false
     });
@@ -120,7 +121,7 @@ export class EssentialStore {
    */
   public getDispatchers<Dispatchers>(linkID: SymbolID): Dispatchers {
     const entry = this.links.get(linkID) as LinkEntries<EssentialLink>;
-    return entry.link.dispatchers as Dispatchers;
+    return entry.link.getDispatchers() as Dispatchers;
   }
 
   /**

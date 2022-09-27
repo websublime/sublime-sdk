@@ -5,7 +5,13 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-import { AnyAction, Slice, createSlice } from '@reduxjs/toolkit';
+import {
+  ActionCreatorWithPayload,
+  AnyAction,
+  Dispatch,
+  Slice,
+  createSlice
+} from '@reduxjs/toolkit';
 
 // eslint-disable-next-line prettier/prettier
 import type { AnyState, Essential, ReducerFunction, SymbolID } from './types';
@@ -29,11 +35,13 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   public namespace: SymbolID;
 
+  public abstract getDispatchers(): Record<string, Function>;
+
   /**
    * Define public reducers
    * @internal
    */
-  protected abstract definedReducers(): Record<string, ReducerFunction>;
+  protected abstract getReducers(): Record<string, ReducerFunction>;
 
   /**
    * Lifecycle hook on creating new instance
@@ -47,20 +55,7 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   protected sliceProps = new WeakMap<SymbolID, Slice<State>>();
 
-  /**
-   * Public dispatchers
-   * @readonly
-   */
-  get dispatchers() {
-    const dispatchers = {};
-
-    for (const [key, property] of Object.entries(this.actions)) {
-      dispatchers[key] = (payload?: any) =>
-        this.dispatch(property.call(property, payload));
-    }
-
-    return dispatchers;
-  }
+  private _dispatch!: Dispatch<AnyAction>;
 
   /**
    * Public main reducer
@@ -103,12 +98,31 @@ export abstract class EssentialLink<State extends AnyState = any>
     action: AnyAction
   ): Promise<void>;
 
+  protected getActionType(key: string) {
+    const id = `${this.namespace.key.toString()}/${key}`;
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+
+    const action = Object.entries(properties.actions).find(
+      ([_key, property]) => property.toString() === id
+    );
+
+    if (!action) {
+      throw new Error(`Action type: ${key} invalid.`);
+    }
+
+    const [_actionKey, actionType] = action;
+    return actionType;
+  }
+
   /**
    * Dispatch actions
    * @internal
    */
-  protected dispatch(_action?: AnyAction) {
-    console.error('Class must be registered thru EssentialLink store');
+  protected dispatch<Payload = any>(
+    action: ActionCreatorWithPayload<any, string>,
+    payload: Payload
+  ) {
+    this._dispatch(action(payload));
   }
 
   /**
@@ -117,7 +131,7 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   protected async initSlice() {
     const { initialState, namespace, sliceProps } = this;
-    const reducers = this.definedReducers();
+    const reducers = this.getReducers();
 
     const slice = createSlice({
       extraReducers: (builder) => {

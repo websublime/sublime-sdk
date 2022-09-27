@@ -37,11 +37,11 @@ export type LinkEntries<T extends Essential<AnyState>> = {
  */
 export interface Essential<State> {
   namespace: SymbolID;
-  readonly dispatchers: unknown;
+  //readonly dispatchers: unknown;
   readonly initialState: State;
   readonly reducer: any;
   readonly actions: Record<string, any>;
-  change?: (oldState: State, newState: State, action: AnyAction) => void;
+  onChange?: (oldState: State, newState: State, action: AnyAction) => void;
 }
 
 export const EssentialStorage = {

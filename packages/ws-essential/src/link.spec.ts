@@ -28,19 +28,26 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedReducers() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType('decrement'), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType('increment'), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          decrement: (state: FooState, action: PayloadAction<number>) => {
+            state.count = state.count - action.payload;
+          },
+          increment: (state: FooState, action: PayloadAction<number>) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
@@ -56,6 +63,7 @@ describe('> Link to EssentialStore', () => {
     increment(1);
   });
 
+  /*
   test('# It should call onChange', async () => {
     expect.assertions(4);
 
@@ -237,4 +245,5 @@ describe('> Link to EssentialStore', () => {
 
     spyBootstrap.mockClear();
   });
+  */
 });
