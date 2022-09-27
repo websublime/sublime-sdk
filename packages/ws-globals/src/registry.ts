@@ -31,7 +31,7 @@ export class RegistryLink extends EssentialLink<RegistryLinkState> {
     return {};
   }
 
-  protected definedActions() {
+  protected definedReducers() {
     return {
       add: this.add
     };

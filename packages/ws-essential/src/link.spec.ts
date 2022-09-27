@@ -28,7 +28,7 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      protected definedReducers() {
         return {
           decrement: this.decrement,
           increment: this.increment
@@ -56,7 +56,7 @@ describe('> Link to EssentialStore', () => {
     increment(1);
   });
 
-  test('# It should call change', async () => {
+  test('# It should call onChange', async () => {
     expect.assertions(4);
 
     const FooLinkID = { key: Symbol(nanoid()) };
@@ -74,7 +74,7 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      protected definedReducers() {
         return {
           decrement: this.decrement,
           increment: this.increment
@@ -89,7 +89,7 @@ describe('> Link to EssentialStore', () => {
         state.count = state.count - action.payload;
       }
 
-      public async change(
+      public async onChange(
         oldState: FooState,
         newState: FooState,
         action: PayloadAction<any>
@@ -103,7 +103,7 @@ describe('> Link to EssentialStore', () => {
       }
     }
 
-    const spyChange = jest.spyOn(FooLink.prototype, 'change');
+    const spyChange = jest.spyOn(FooLink.prototype, 'onChange');
     const fooLink = new FooLink(FooLinkID);
 
     await store.addLink(fooLink);
@@ -141,7 +141,7 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      protected definedReducers() {
         return {
           decrement: this.decrement,
           increment: this.increment
@@ -164,7 +164,7 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      protected definedReducers() {
         return {
           publish: this.publish
         };
@@ -196,7 +196,7 @@ describe('> Link to EssentialStore', () => {
     publish('Hello World');
   });
 
-  test('# It should call bootstrap', async () => {
+  test('# It should call onCreate', async () => {
     expect.assertions(2);
 
     const FooLinkID = { key: Symbol(nanoid()) };
@@ -210,7 +210,7 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      protected definedReducers() {
         return {
           decrement: this.decrement,
           increment: this.increment
@@ -225,12 +225,12 @@ describe('> Link to EssentialStore', () => {
         state.count = state.count - action.payload;
       }
 
-      public bootstrap() {
+      public onCreate() {
         expect(true).toBeTruthy();
       }
     }
 
-    const spyBootstrap = jest.spyOn(FooLink.prototype, 'bootstrap');
+    const spyBootstrap = jest.spyOn(FooLink.prototype, 'onCreate');
     new FooLink(FooLinkID);
 
     expect(spyBootstrap).toHaveBeenCalledTimes(1);

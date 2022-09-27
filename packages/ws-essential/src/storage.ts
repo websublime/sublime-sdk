@@ -29,7 +29,15 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     return `ws:${this.namespace.key.toString()}`;
   }
 
-  setupStore() {
+  public async onChange(
+    _oldState: State,
+    newState: State,
+    _action: AnyAction
+  ): Promise<void> {
+    return await this.persistence.setItem(this.storageName, newState as any);
+  }
+
+  protected setupDriver() {
     let driver: any;
 
     switch (this.storage) {
@@ -55,12 +63,8 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     });
   }
 
-  public async change(
-    _oldState: State,
-    newState: State,
-    _action: AnyAction
-  ): Promise<void> {
-    return await this.persistence.setItem(this.storageName, newState as any);
+  protected onCreate(): void {
+    this.setupDriver();
   }
 
   /**
@@ -68,14 +72,12 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
    * @internal
    */
   protected async initSlice() {
-    this.setupStore();
-
     const persistedState = (await this.persistence.getItem(
       this.storageName
     )) as State;
 
     const { initialState, namespace, sliceProps } = this;
-    const reducers = this.definedActions();
+    const reducers = this.definedReducers();
 
     const slice = createSlice({
       extraReducers: (builder) => {

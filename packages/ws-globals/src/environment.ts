@@ -39,7 +39,7 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
     };
   }
 
-  protected definedActions() {
+  protected definedReducers() {
     return {
       setApiUrl: this.setApiUrl,
       setEnvironment: this.setEnvironment,

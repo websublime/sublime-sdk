@@ -1,6 +1,6 @@
 global.window = Object.create(window);
 
-const localStorageMock = (function () {
+const storageMock = (function () {
   const store = {};
 
   return {
@@ -19,4 +19,5 @@ const localStorageMock = (function () {
   };
 })();
 
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'localStorage', { value: storageMock });
+Object.defineProperty(window, 'sessionStorage', { value: storageMock });

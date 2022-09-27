@@ -30,16 +30,16 @@ export abstract class EssentialLink<State extends AnyState = any>
   public namespace: SymbolID;
 
   /**
-   * Define public actions
+   * Define public reducers
    * @internal
    */
-  protected abstract definedActions(): Record<string, ReducerFunction>;
+  protected abstract definedReducers(): Record<string, ReducerFunction>;
 
   /**
    * Lifecycle hook on creating new instance
    * @internal
    */
-  protected bootstrap?(): void;
+  protected onCreate?(): void;
 
   /**
    * Slice descriptor properties
@@ -85,8 +85,8 @@ export abstract class EssentialLink<State extends AnyState = any>
   constructor(key: SymbolID) {
     this.namespace = key;
 
-    if (this.bootstrap) {
-      this.bootstrap();
+    if (this.onCreate) {
+      this.onCreate();
     }
   }
 
@@ -95,9 +95,9 @@ export abstract class EssentialLink<State extends AnyState = any>
   }
 
   /**
-   * Hook on any sate change
+   * Hook on any slice state change
    */
-  public async change?(
+  public async onChange?(
     oldState: State,
     newState: State,
     action: AnyAction
@@ -117,7 +117,7 @@ export abstract class EssentialLink<State extends AnyState = any>
    */
   protected async initSlice() {
     const { initialState, namespace, sliceProps } = this;
-    const reducers = this.definedActions();
+    const reducers = this.definedReducers();
 
     const slice = createSlice({
       extraReducers: (builder) => {

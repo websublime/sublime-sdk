@@ -168,11 +168,11 @@ export class EssentialStore {
         const stateName: string = link.namespace.key.toString();
         const { [stateName]: state } = listenerApi.getState() as any;
 
-        if (link.change) {
+        if (link.onChange) {
           const { [stateName]: oldState } =
             listenerApi.getOriginalState() as any;
 
-          await link.change(oldState, state, action);
+          await link.onChange(oldState, state, action);
         }
 
         const callbacks = listeners
