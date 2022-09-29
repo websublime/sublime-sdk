@@ -171,6 +171,7 @@ export class EssentialStore {
     return () => this.removeListener(linkID, id);
   }
 
+  // TODO: change to same signature as subscription (arrays)
   public pipe(
     linkID: SymbolID,
     callback: (results: Record<string, any>) => void
