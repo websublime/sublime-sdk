@@ -334,7 +334,7 @@ describe('> Link to EssentialStore', () => {
           decrement: (value: number) => {
             this.dispatch(this.getActionType(ACTION_DECREMENT), value);
           },
-          increment: (value: number) => {
+          increment: async (value: number) => {
             this.dispatch(this.getActionType(ACTION_INCREMENT), value);
           }
         };
@@ -373,11 +373,6 @@ describe('> Link to EssentialStore', () => {
 
     const fooLink = new FooLink(FooLinkID);
     await store.addLink(fooLink, true);
-
-    store.pipe(FooLinkID, (results) => {
-      console.log(results);
-      expect(true).toBe(true);
-    });
   });
 
   test('# It should pipe selectors results', async () => {
@@ -415,7 +410,7 @@ describe('> Link to EssentialStore', () => {
         return {
           isPositive: (state: FooState) => state.count > 0,
           isNegative: (state: FooState) => state.count < 0,
-          isNeutral: (state: FooState) => state.count === 0,
+          isNeutral: async (state: FooState) => state.count === 0,
         };
       }
 
@@ -436,7 +431,6 @@ describe('> Link to EssentialStore', () => {
         };
       }
     }
-
 
     const fooLink = new FooLink(FooLinkID);
 

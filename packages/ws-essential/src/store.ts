@@ -17,7 +17,7 @@ import {
   nanoid
 } from '@reduxjs/toolkit';
 
-// eslint-disable-next-line prettier/prettier
+import { executeGenerator } from './helpers';
 import type { EssentialLink } from './link';
 import type {
   Class,
@@ -213,6 +213,7 @@ export class EssentialStore {
   ) {
     this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
+        debugger;
         const subscriptions = this.subscriptions.get(link.namespace) || [];
         const pipes = this.pipes.get(link.namespace);
         const stateName: string = link.namespace.key.description as string;
@@ -234,25 +235,28 @@ export class EssentialStore {
           );
 
         if (callbacks) {
-          for (const callback of callbacks) {
-            callback(state, action);
-          }
+          const executeSubscriptions = async () => {
+            for (const subscriptionCallback of callbacks) {
+              await Promise.resolve(subscriptionCallback(state, action));
+            }
+          };
+
+          await executeSubscriptions();
         }
 
         if (pipes) {
           const { callback, ...rest } = pipes;
 
-          // eslint-disable-next-line unicorn/no-array-reduce
-          const results = Object.entries(rest).reduce((accumulator, entry) => {
-            const [key, function_] = entry;
-
-            accumulator = {
-              ...accumulator,
-              [key]: function_(state)
-            };
+          const executePipe = async (accumulator: Record<string, any>) => {
+            for (const [key, selector] of Object.entries(rest)) {
+              const { value } = await executeGenerator(selector, state).next();
+              accumulator[key] = value;
+            }
 
             return accumulator;
-          }, {});
+          };
+
+          const results = await executePipe({});
 
           callback(results);
         }

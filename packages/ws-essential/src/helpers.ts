@@ -20,3 +20,10 @@ export const isSsr = () => typeof window === 'undefined';
  * @public
  */
 export const createSymbolID = (key: string): SymbolID => ({ key: Symbol(key) });
+
+export async function* executeGenerator(
+  functionCall: (...argument: any) => any,
+  ...arguments_: any
+) {
+  yield functionCall(arguments_);
+}
