@@ -21,14 +21,22 @@ export type ReducerFunction = <T extends { type: string; payload: any }>(
   action: T
 ) => void;
 
+export type LinkSubscriptions = Array<{
+  callback: (state: AnyState, action: AnyAction) => void;
+  priority: number;
+  once: boolean;
+  id: string;
+}>;
+
+export type LinkPipes = {
+  callback: (results: Record<keyof Omit<LinkPipes, 'callback'>, any>) => void;
+  [key: string]: (state: AnyState) => unknown;
+};
+
+export type LinkUnsubscribe = () => void;
+
 export type LinkEntries<T extends Essential<AnyState>> = {
   link: InstanceType<Class<T>>;
-  listeners: {
-    callback: (state: AnyState, action: AnyAction) => void;
-    priority: number;
-    once: boolean;
-    id: string;
-  }[];
 };
 
 /**

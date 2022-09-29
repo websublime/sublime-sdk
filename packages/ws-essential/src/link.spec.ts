@@ -312,4 +312,146 @@ describe('> Link to EssentialStore', () => {
 
     spyBootstrap.mockClear();
   });
+
+  test('# It should emit when adding a link to store', async () => {
+    expect.assertions(1);
+
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+    type FooState = { count: number };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      getDispatchers() {
+        return {
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
+        };
+      }
+
+      getSelectors() {
+        return {
+          isPositive: (state: FooState) => state.count > 0,
+          isNegative: (state: FooState) => state.count < 0,
+          isNeutral: (state: FooState) => state.count === 0,
+        };
+      }
+
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
+      }
+    }
+
+    const unsubscribe = store.subscribe(FooLinkID, (state: FooState) => {
+      expect(state).toEqual({ count: 0 });
+      unsubscribe();
+    });
+
+    const fooLink = new FooLink(FooLinkID);
+    await store.addLink(fooLink, true);
+
+    store.pipe(FooLinkID, (results) => {
+      console.log(results);
+      expect(true).toBe(true);
+    });
+  });
+
+  test('# It should pipe selectors results', async () => {
+    expect.assertions(9);
+
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+    type FooState = { count: number };
+    type FooDispatchers = {
+      increment: (value: number) => void;
+      decrement: (value: number) => void;
+    };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      getDispatchers() {
+        return {
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
+        };
+      }
+
+      getSelectors() {
+        return {
+          isPositive: (state: FooState) => state.count > 0,
+          isNegative: (state: FooState) => state.count < 0,
+          isNeutral: (state: FooState) => state.count === 0,
+        };
+      }
+
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
+      }
+    }
+
+
+    const fooLink = new FooLink(FooLinkID);
+
+    await store.addLink(fooLink, true);
+
+    const { increment, decrement } = store.getDispatchers<FooDispatchers>(FooLinkID);
+
+    store.pipe(FooLinkID, (results) => {
+      expect(results.hasOwnProperty('isPositive')).toBe(true);
+      expect(results.hasOwnProperty('isNegative')).toBe(true);
+      expect(results.hasOwnProperty('isNeutral')).toBe(true);
+    });
+
+    increment(2);
+    decrement(3);
+    increment(1);
+  });
 });

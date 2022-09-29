@@ -54,6 +54,12 @@ export abstract class EssentialLink<State extends AnyState = any>
   protected onCreate?(): void;
 
   /**
+   * Define selectors to use on pipe
+   * @public
+   */
+  public getSelectors?(): Record<string, (state: State) => unknown>;
+
+  /**
    * Slice descriptor properties
    * @internal
    */
@@ -165,7 +171,10 @@ export abstract class EssentialLink<State extends AnyState = any>
       },
       initialState,
       name: namespace.key.description as string,
-      reducers
+      reducers: {
+        ...reducers,
+        '@ACTION_INIT': (state) => state
+      }
     });
 
     sliceProps.set(namespace, slice);

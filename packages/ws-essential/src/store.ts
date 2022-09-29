@@ -11,6 +11,7 @@ import {
   Store,
   combineReducers,
   configureStore,
+  createAction,
   createListenerMiddleware,
   createReducer,
   nanoid
@@ -18,7 +19,14 @@ import {
 
 // eslint-disable-next-line prettier/prettier
 import type { EssentialLink } from './link';
-import type { Class, LinkEntries, SymbolID } from './types';
+import type {
+  Class,
+  LinkEntries,
+  LinkPipes,
+  LinkSubscriptions,
+  LinkUnsubscribe,
+  SymbolID
+} from './types';
 
 /**
  * Essential store is the redux context
@@ -36,6 +44,10 @@ export class EssentialStore {
    * @internal
    */
   private links = new WeakMap<SymbolID, LinkEntries<EssentialLink>>();
+
+  private subscriptions = new WeakMap<SymbolID, LinkSubscriptions>();
+
+  private pipes = new WeakMap<SymbolID, LinkPipes>();
 
   /**
    * Links cache
@@ -69,6 +81,8 @@ export class EssentialStore {
       reducer: rootReducer,
       ...options
     });
+
+    // this.store.subscribe(() => {});
   }
 
   /**
@@ -82,12 +96,19 @@ export class EssentialStore {
 
   /**
    * Add links to registry and patch dispatch
-   * from redux store.
+   * from redux store. Having emit parameter true
+   * the namespace/init action will be trigger.
    * @public
    */
   public async addLink<Link extends EssentialLink>(
-    link: InstanceType<Class<Link>>
+    link: InstanceType<Class<Link>>,
+    emit = false
   ) {
+    if (this.links.has(link.namespace)) {
+      // eslint-disable-next-line no-console
+      return console.warn('Link already registered');
+    }
+
     const { dispatch } = this.store;
 
     Object.defineProperty(link, '_dispatch', {
@@ -109,9 +130,12 @@ export class EssentialStore {
 
     this.addListener(link);
 
+    if (emit) {
+      dispatch(createAction(`${link.namespace.key.description}/@ACTION_INIT`));
+    }
+
     this.links.set(link.namespace, {
-      link,
-      listeners: []
+      link
     });
 
     this.ids.push(link.namespace);
@@ -134,13 +158,31 @@ export class EssentialStore {
     linkID: SymbolID,
     callback: (state: any, action: AnyAction) => void,
     priority = 1
-  ) {
-    const { listeners } = this.links.get(linkID) as LinkEntries<EssentialLink>;
+  ): LinkUnsubscribe {
+    if (!this.subscriptions.has(linkID)) {
+      this.subscriptions.set(linkID, []);
+    }
+
+    const subscription = this.subscriptions.get(linkID) as LinkSubscriptions;
     const id = nanoid();
 
-    listeners.push({ callback, id, once: false, priority });
+    subscription.push({ callback, id, once: false, priority });
 
     return () => this.removeListener(linkID, id);
+  }
+
+  public pipe(
+    linkID: SymbolID,
+    callback: (results: Record<string, any>) => void
+  ) {
+    const { link } = this.links.get(linkID) as LinkEntries<EssentialLink>;
+
+    if (link.getSelectors) {
+      this.pipes.set(link.namespace, {
+        callback,
+        ...link.getSelectors()
+      });
+    }
   }
 
   /**
@@ -152,10 +194,14 @@ export class EssentialStore {
     callback: (state: any, action: AnyAction) => void,
     priority = 1
   ) {
-    const { listeners } = this.links.get(linkID) as LinkEntries<EssentialLink>;
+    if (!this.subscriptions.has(linkID)) {
+      this.subscriptions.set(linkID, []);
+    }
+
+    const subscription = this.subscriptions.get(linkID) as LinkSubscriptions;
     const id = nanoid();
 
-    listeners.push({ callback, id, once: true, priority });
+    subscription.push({ callback, id, once: true, priority });
   }
 
   /**
@@ -167,7 +213,8 @@ export class EssentialStore {
   ) {
     this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
-        const { listeners } = this.links.get(link.namespace) || {};
+        const subscriptions = this.subscriptions.get(link.namespace) || [];
+        const pipes = this.pipes.get(link.namespace);
         const stateName: string = link.namespace.key.description as string;
         const { [stateName]: state } = listenerApi.getState() as any;
 
@@ -178,7 +225,7 @@ export class EssentialStore {
           await link.onChange(oldState, state, action);
         }
 
-        const callbacks = listeners
+        const callbacks = subscriptions
           ?.sort((before, after) => after.priority - before.priority)
           // eslint-disable-next-line unicorn/no-array-reduce
           .reduce(
@@ -190,6 +237,24 @@ export class EssentialStore {
           for (const callback of callbacks) {
             callback(state, action);
           }
+        }
+
+        if (pipes) {
+          const { callback, ...rest } = pipes;
+
+          // eslint-disable-next-line unicorn/no-array-reduce
+          const results = Object.entries(rest).reduce((accumulator, entry) => {
+            const [key, function_] = entry;
+
+            accumulator = {
+              ...accumulator,
+              [key]: function_(state)
+            };
+
+            return accumulator;
+          }, {});
+
+          callback(results);
         }
 
         this.removeListener(link.namespace);
@@ -221,14 +286,14 @@ export class EssentialStore {
    * @internal
    */
   private removeListener(linkID: SymbolID, id?: string) {
-    const linkEntries = this.links.get(linkID);
-    //@TODO: remove ids from cache
-    if (linkEntries) {
-      linkEntries.listeners = id
-        ? linkEntries.listeners.filter((listener) => listener.id !== id)
-        : linkEntries.listeners.filter((listener) => listener.once === false);
+    const subscriptions = this.subscriptions.get(linkID);
 
-      this.links.set(linkID, linkEntries);
+    if (subscriptions) {
+      const subs = id
+        ? subscriptions.filter((listener) => listener.id !== id)
+        : subscriptions.filter((listener) => listener.once === false);
+
+      this.subscriptions.set(linkID, subs);
     }
   }
 }
