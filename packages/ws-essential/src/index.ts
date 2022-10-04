@@ -19,6 +19,7 @@ declare global {
 
   interface Window {
     essential: EssentialStoreObject;
+    __REDUX_DEVTOOLS_EXTENSION_LOCKED__: boolean;
   }
 }
 
@@ -37,6 +38,8 @@ const isStoreAvailable = () => {
  */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
+    window.__REDUX_DEVTOOLS_EXTENSION_LOCKED__ = import.meta.env.DEV;
+
     const options = {
       devTools: import.meta.env.DEV,
       ...storeOptions

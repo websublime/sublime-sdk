@@ -7,9 +7,8 @@
 
 import {
   ActionCreatorWithPayload,
-  //ActionCreatorWithoutPayload,
+  ActionCreatorWithoutPayload,
   AnyAction,
-  Dispatch,
   Slice,
   createSlice
 } from '@reduxjs/toolkit';
@@ -70,8 +69,6 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Reference to original store.dispatch
    * @public
    */
-  private _dispatch!: Dispatch<AnyAction>;
-  /*
   protected dispatch<Payload = any>(
     action:
       | ActionCreatorWithPayload<Payload, string>
@@ -83,7 +80,6 @@ export abstract class EssentialLink<State extends AnyState = any>
       'Dispatch is only available when class is added to the store'
     );
   }
-  */
 
   /**
    * Public main reducer
@@ -156,17 +152,6 @@ export abstract class EssentialLink<State extends AnyState = any>
 
     const [_actionKey, actionType] = action;
     return actionType;
-  }
-
-  /**
-   * Dispatch actions
-   * @public
-   */
-  protected dispatch<Payload = any>(
-    action: ActionCreatorWithPayload<Payload, string>,
-    payload: Payload
-  ) {
-    this._dispatch(action(payload));
   }
 
   /**
