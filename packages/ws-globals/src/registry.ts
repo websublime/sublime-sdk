@@ -55,6 +55,7 @@ export class RegistryLink extends EssentialLink<RegistryLinkState> {
           ...state,
           ...action.payload
         };
+        return state;
       }
     };
   }

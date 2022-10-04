@@ -59,8 +59,9 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
 
   protected getReducers() {
     return {
-      [RESET]: (_state: EnvironmentLinkState, action: PayloadAction<any>) => {
-        _state = action.payload;
+      [RESET]: (state: EnvironmentLinkState, action: PayloadAction<any>) => {
+        state = action.payload;
+        return state;
       },
       [SET_OPTION]: (
         state: EnvironmentLinkState,
@@ -70,6 +71,7 @@ export class EnvironmentLink extends EssentialLink<EnvironmentLinkState> {
           ...state,
           ...action.payload
         };
+        return state;
       }
     };
   }
