@@ -5,7 +5,7 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 import {
-  ActionCreatorWithPayload,
+  //ActionCreatorWithPayload,
   AnyAction,
   ConfigureStoreOptions,
   Reducer,
@@ -112,6 +112,12 @@ export class EssentialStore {
 
     const { dispatch } = this.store;
 
+    Object.defineProperty(link, '_dispatch', {
+      enumerable: false,
+      value: dispatch,
+      writable: false
+    });
+    /*
     ((store) => {
       Reflect.defineProperty(link, 'dispatch', {
         get() {
@@ -124,6 +130,7 @@ export class EssentialStore {
         }
       });
     })(this.store);
+    */
 
     await link.initialize();
 
