@@ -17,11 +17,7 @@ module.exports = defineConfig({
   },
   define: {
     Version: JSON.stringify(version),
-    global: 'globalThis',
-    'globalThis.process.env.NODE_ENV':
-      process.env.NODE_ENV === 'production'
-        ? JSON.stringify('production')
-        : JSON.stringify('development')
+    global: 'globalThis'
   },
   build: {
     lib: {
@@ -38,9 +34,7 @@ module.exports = defineConfig({
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
-        globals: {
-          '@websublime/ws-essential': 'window.top.essential'
-        }
+        globals: {}
       }
     },
     sourcemap: true,

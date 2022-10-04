@@ -38,8 +38,10 @@ const isStoreAvailable = () => {
  */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
+    const environment = process.env.NODE_ENV || 'production';
+
     const options = {
-      devTools: import.meta.env.DEV,
+      devTools: environment !== 'production',
       ...storeOptions
     };
 

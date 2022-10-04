@@ -38,13 +38,13 @@ const initializeEnvironment = async (environment: Environment) => {
   const { add } =
     store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
 
-  add({ api: apiUrl, env });
+  return add({ api: apiUrl, env });
 };
 
 const initializeRegistry = async () => {
   const store = useStore();
 
-  await store.addLink(new RegistryLink(RegistryLinkID));
+  return await store.addLink(new RegistryLink(RegistryLinkID));
 };
 
 export const bootGlobals = async (

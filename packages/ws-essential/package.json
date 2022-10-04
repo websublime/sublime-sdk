@@ -6,6 +6,7 @@
   "scripts": {
     "start": "vite --debug",
     "build": "yarn dts && vite build --mode=production && yarn types",
+    "build:dev": "yarn dts && vite build --mode=development && yarn types",
     "dts": "tsc --declaration --emitDeclarationOnly",
     "types": "mkdir dist/docs && api-extractor run --local && rm -rf ./declarations",
     "release": "yarn changeset publish",
