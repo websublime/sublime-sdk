@@ -45,8 +45,6 @@ export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
       ...storeOptions
     };
 
-    window.__REDUX_DEVTOOLS_EXTENSION_LOCKED__ = options.devTools as boolean;
-
     context.essential = Object.seal({
       isStoreAvailable: isStoreAvailable,
       store: new EssentialStore(options),

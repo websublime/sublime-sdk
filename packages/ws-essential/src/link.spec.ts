@@ -35,10 +35,10 @@ describe('> Link to EssentialStore', () => {
       getDispatchers() {
         return {
           decrement: (value: number) => {
-            this.dispatch<number>(this.getActionType(ACTION_DECREMENT), value);
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
           },
           increment: (value: number) => {
-            this.dispatch<number>(this.getActionType(ACTION_INCREMENT), value);
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
           }
         };
       }
