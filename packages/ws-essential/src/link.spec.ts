@@ -35,10 +35,10 @@ describe('> Link to EssentialStore', () => {
       getDispatchers() {
         return {
           decrement: (value: number) => {
-            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+            this.dispatch<number>(this.getActionType(ACTION_DECREMENT), value);
           },
           increment: (value: number) => {
-            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+            this.dispatch<number>(this.getActionType(ACTION_INCREMENT), value);
           }
         };
       }
@@ -344,7 +344,7 @@ describe('> Link to EssentialStore', () => {
         return {
           isPositive: (state: FooState) => state.count > 0,
           isNegative: (state: FooState) => state.count < 0,
-          isNeutral: (state: FooState) => state.count === 0,
+          isNeutral: (state: FooState) => state.count === 0
         };
       }
 
@@ -410,7 +410,7 @@ describe('> Link to EssentialStore', () => {
         return {
           isPositive: (state: FooState) => state.count > 0,
           isNegative: (state: FooState) => state.count < 0,
-          isNeutral: async (state: FooState) => state.count === 0,
+          isNeutral: async (state: FooState) => state.count === 0
         };
       }
 
@@ -436,7 +436,8 @@ describe('> Link to EssentialStore', () => {
 
     await store.addLink(fooLink, true);
 
-    const { increment, decrement } = store.getDispatchers<FooDispatchers>(FooLinkID);
+    const { decrement, increment } =
+      store.getDispatchers<FooDispatchers>(FooLinkID);
 
     store.pipe(FooLinkID, (results) => {
       expect(results.hasOwnProperty('isPositive')).toBe(true);
