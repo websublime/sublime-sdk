@@ -38,12 +38,12 @@ const isStoreAvailable = () => {
  */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
-    window.__REDUX_DEVTOOLS_EXTENSION_LOCKED__ = import.meta.env.DEV;
-
     const options = {
       devTools: import.meta.env.DEV,
       ...storeOptions
     };
+
+    window.__REDUX_DEVTOOLS_EXTENSION_LOCKED__ = options.devTools as boolean;
 
     context.essential = Object.seal({
       isStoreAvailable: isStoreAvailable,
