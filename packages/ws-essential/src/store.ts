@@ -112,16 +112,18 @@ export class EssentialStore {
 
     const { dispatch } = this.store;
 
-    Reflect.defineProperty(link, 'dispatch', {
-      get() {
-        return function <Payload = any>(
-          action: ActionCreatorWithPayload<Payload, string>,
-          payload: Payload
-        ) {
-          dispatch(action(payload));
-        };
-      }
-    });
+    ((store) => {
+      Reflect.defineProperty(link, 'dispatch', {
+        get() {
+          return function <Payload = any>(
+            action: ActionCreatorWithPayload<Payload, string>,
+            payload: Payload
+          ) {
+            store.dispatch.apply(store, [action(payload)]);
+          };
+        }
+      });
+    })(this.store);
 
     await link.initialize();
 
