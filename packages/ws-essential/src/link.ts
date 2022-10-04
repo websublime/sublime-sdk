@@ -77,7 +77,7 @@ export abstract class EssentialLink<State extends AnyState = any>
   ): void {
     console.error(action, payload);
     throw new Error(
-      'Dispatch is only available when class is added to th store'
+      'Dispatch is only available when class is added to the store'
     );
   }
 
