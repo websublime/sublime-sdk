@@ -7,6 +7,7 @@
 
 import {
   ActionCreatorWithPayload,
+  ActionCreatorWithoutPayload,
   AnyAction,
   Dispatch,
   Slice,
@@ -54,6 +55,12 @@ export abstract class EssentialLink<State extends AnyState = any>
   protected onCreate?(): void;
 
   /**
+   * Lifecycle hook on creating new instance
+   * @internal
+   */
+  protected onBeforeInit?(dispatch: Dispatch): void;
+
+  /**
    * Define selectors to use on pipe
    * @public
    */
@@ -69,7 +76,17 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Reference to original store.dispatch
    * @public
    */
-  private _dispatch!: Dispatch<AnyAction>;
+  protected dispatch<Payload = any>(
+    action:
+      | ActionCreatorWithPayload<Payload, string>
+      | ActionCreatorWithoutPayload,
+    payload: Payload
+  ): void {
+    console.error(action, payload);
+    throw new Error(
+      'Dispatch is only available when class is added to the store'
+    );
+  }
 
   /**
    * Public main reducer
@@ -145,22 +162,12 @@ export abstract class EssentialLink<State extends AnyState = any>
   }
 
   /**
-   * Dispatch actions
-   * @public
-   */
-  protected dispatch<Payload = any>(
-    action: ActionCreatorWithPayload<Payload, string>,
-    payload: Payload
-  ) {
-    this._dispatch(action(payload));
-  }
-
-  /**
    * Creates and initialize state slice
    * @internal
    */
   protected async initSlice() {
-    const { initialState, namespace, sliceProps } = this;
+    const { dispatch, initialState, namespace, onBeforeInit, sliceProps } =
+      this;
     const reducers = this.getReducers();
 
     const slice = createSlice({
@@ -178,5 +185,9 @@ export abstract class EssentialLink<State extends AnyState = any>
     });
 
     sliceProps.set(namespace, slice);
+
+    if (onBeforeInit) {
+      onBeforeInit(dispatch as any);
+    }
   }
 }

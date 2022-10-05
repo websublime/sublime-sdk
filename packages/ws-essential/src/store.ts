@@ -5,6 +5,7 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 import {
+  ActionCreatorWithPayload,
   AnyAction,
   ConfigureStoreOptions,
   Reducer,
@@ -111,11 +112,27 @@ export class EssentialStore {
 
     const { dispatch } = this.store;
 
-    Object.defineProperty(link, '_dispatch', {
-      enumerable: false,
-      value: dispatch,
-      writable: false
+    ((store) => {
+      Object.defineProperty(link, 'dispatch', {
+        enumerable: false,
+        get() {
+          return function <Payload = any>(
+            action: ActionCreatorWithPayload<Payload, string>,
+            payload: Payload
+          ) {
+            store.dispatch.apply(store, [action(payload)]);
+          };
+        }
+      });
+    })(this.store);
+
+    this.links.set(link.namespace, {
+      link
     });
+
+    this.ids.push(link.namespace);
+
+    this.addListener(link);
 
     await link.initialize();
 
@@ -128,17 +145,9 @@ export class EssentialStore {
       combineReducers({ ...cachedEntries, ...linkReducer })
     );
 
-    this.addListener(link);
-
     if (emit) {
       dispatch(createAction(`${link.namespace.key.description}/@ACTION_INIT`));
     }
-
-    this.links.set(link.namespace, {
-      link
-    });
-
-    this.ids.push(link.namespace);
   }
 
   /**
@@ -214,7 +223,6 @@ export class EssentialStore {
   ) {
     this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
-        debugger;
         const subscriptions = this.subscriptions.get(link.namespace) || [];
         const pipes = this.pipes.get(link.namespace);
         const stateName: string = link.namespace.key.description as string;
