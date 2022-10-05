@@ -65,6 +65,10 @@ async function init() {
       };
     }
 
+    protected onBeforeInit(): void {
+      this.dispatch(this.getActionType(ACTION_INCREMENT), 5);
+    }
+
     protected getReducers() {
       return {
         [ACTION_DECREMENT]: (
@@ -72,12 +76,14 @@ async function init() {
           action: PayloadAction<number>
         ) => {
           state.count = state.count - action.payload;
+          return state;
         },
         [ACTION_INCREMENT]: (
           state: FooState,
           action: PayloadAction<number>
         ) => {
           state.count = state.count + action.payload;
+          return state;
         }
       };
     }
@@ -111,17 +117,10 @@ async function init() {
     }
   }
 
-  await store.addLink(new FooLink(FooLinkID));
-  await store.addLink(new BarLink(BarLinkID));
-
-  const { decrement, increment } =
-    store.getDispatchers<FooDispatchers>(FooLinkID);
-  const { publish } = store.getDispatchers<BarDispatchers>(BarLinkID);
-
   store.subscribe(FooLinkID, (state: FooState) => {
     const element = document.querySelector('#example') as HTMLDivElement;
 
-    element.innerHTML = `<span>${state.count}</span>`;
+    element.innerHTML = `<span>${state?.count || '0'}</span>`;
   });
 
   store.subscribe(BarLinkID, (state: BarState) => {
@@ -131,6 +130,13 @@ async function init() {
 
     element.append(message);
   });
+
+  await store.addLink(new FooLink(FooLinkID), true);
+  await store.addLink(new BarLink(BarLinkID));
+
+  const { decrement, increment } =
+    store.getDispatchers<FooDispatchers>(FooLinkID);
+  const { publish } = store.getDispatchers<BarDispatchers>(BarLinkID);
 
   const buttonIncrement = document.querySelector(
     '#increment'

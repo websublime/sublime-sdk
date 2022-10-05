@@ -9,8 +9,8 @@ import {
   ActionCreatorWithPayload,
   ActionCreatorWithoutPayload,
   AnyAction,
-  Dispatch,
   Slice,
+  createAction,
   createSlice
 } from '@reduxjs/toolkit';
 
@@ -58,7 +58,7 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Lifecycle hook on creating new instance
    * @internal
    */
-  protected onBeforeInit?(dispatch: Dispatch): void;
+  protected onBeforeInit?(): void;
 
   /**
    * Define selectors to use on pipe
@@ -80,7 +80,7 @@ export abstract class EssentialLink<State extends AnyState = any>
     action:
       | ActionCreatorWithPayload<Payload, string>
       | ActionCreatorWithoutPayload,
-    payload: Payload
+    payload?: Payload
   ): void {
     console.error(action, payload);
     throw new Error(
@@ -107,12 +107,12 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Create redux slice and call hook
    * @internal
    */
-  public async initialize() {
+  public async initialize(emit = false) {
     if (this.onCreate) {
       this.onCreate();
     }
 
-    await this.initSlice();
+    return this.initSlice(emit);
   }
 
   /**
@@ -165,10 +165,10 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Creates and initialize state slice
    * @internal
    */
-  protected async initSlice() {
-    const { dispatch, initialState, namespace, onBeforeInit, sliceProps } =
-      this;
+  protected async initSlice(emit: boolean) {
+    const { initialState, namespace, onBeforeInit, sliceProps } = this;
     const reducers = this.getReducers();
+    const actionInit = `@ACTION_INIT`;
 
     const slice = createSlice({
       extraReducers: (builder) => {
@@ -180,14 +180,21 @@ export abstract class EssentialLink<State extends AnyState = any>
       name: namespace.key.description as string,
       reducers: {
         ...reducers,
-        '@ACTION_INIT': (state) => state
+        [actionInit]: (state) => state
       }
     });
 
     sliceProps.set(namespace, slice);
 
+    if (emit) {
+      const action = createAction<any, string>(
+        `${namespace.key.description}/@ACTION_INIT`
+      );
+      this.dispatch(action, initialState);
+    }
+
     if (onBeforeInit) {
-      onBeforeInit(dispatch as any);
+      onBeforeInit.apply(this);
     }
   }
 }

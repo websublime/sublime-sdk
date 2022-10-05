@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Copyright Websublime All Rights Reserved.
  *
@@ -12,14 +13,13 @@ import {
   Store,
   combineReducers,
   configureStore,
-  createAction,
   createListenerMiddleware,
   createReducer,
   nanoid
 } from '@reduxjs/toolkit';
 
 import { executeGenerator } from './helpers';
-import type { EssentialLink } from './link';
+import { EssentialLink } from './link';
 import type {
   Class,
   LinkEntries,
@@ -82,8 +82,6 @@ export class EssentialStore {
       reducer: rootReducer,
       ...options
     });
-
-    // this.store.subscribe(() => {});
   }
 
   /**
@@ -110,7 +108,7 @@ export class EssentialStore {
       return console.warn('Link already registered');
     }
 
-    const { dispatch } = this.store;
+    this.addListener(link);
 
     ((store) => {
       Object.defineProperty(link, 'dispatch', {
@@ -132,9 +130,7 @@ export class EssentialStore {
 
     this.ids.push(link.namespace);
 
-    this.addListener(link);
-
-    await link.initialize();
+    await link.initialize(emit);
 
     const linkReducer = {
       [link.namespace.key.description as string]: link.reducer
@@ -144,10 +140,6 @@ export class EssentialStore {
     this.store.replaceReducer(
       combineReducers({ ...cachedEntries, ...linkReducer })
     );
-
-    if (emit) {
-      dispatch(createAction(`${link.namespace.key.description}/@ACTION_INIT`));
-    }
   }
 
   /**
@@ -223,10 +215,15 @@ export class EssentialStore {
   ) {
     this.listenerMiddleware.startListening({
       effect: async (action, listenerApi) => {
+        const defaultState = {
+          ...link.initialState,
+          ...action.payload
+        };
+
         const subscriptions = this.subscriptions.get(link.namespace) || [];
         const pipes = this.pipes.get(link.namespace);
         const stateName: string = link.namespace.key.description as string;
-        const { [stateName]: state } = listenerApi.getState() as any;
+        const { [stateName]: state = defaultState } = listenerApi.getState() as any;
 
         if (link.onChange) {
           const { [stateName]: oldState } =
