@@ -65,7 +65,7 @@ async function init() {
       };
     }
 
-    protected onBeforeInit(): void {
+    public onAfterInit(): void {
       this.dispatch(this.getActionType(ACTION_INCREMENT), 5);
     }
 
@@ -120,7 +120,7 @@ async function init() {
   store.subscribe(FooLinkID, (state: FooState) => {
     const element = document.querySelector('#example') as HTMLDivElement;
 
-    element.innerHTML = `<span>${state?.count || '0'}</span>`;
+    element.innerHTML = `<span>${state.count}</span>`;
   });
 
   store.subscribe(BarLinkID, (state: BarState) => {
@@ -132,7 +132,7 @@ async function init() {
   });
 
   await store.addLink(new FooLink(FooLinkID), true);
-  await store.addLink(new BarLink(BarLinkID));
+  await store.addLink(new BarLink(BarLinkID), true);
 
   const { decrement, increment } =
     store.getDispatchers<FooDispatchers>(FooLinkID);

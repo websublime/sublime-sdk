@@ -10,7 +10,6 @@ import {
   ActionCreatorWithoutPayload,
   AnyAction,
   Slice,
-  createAction,
   createSlice
 } from '@reduxjs/toolkit';
 
@@ -49,16 +48,18 @@ export abstract class EssentialLink<State extends AnyState = any>
   protected abstract getReducers(): Record<string, ReducerFunction>;
 
   /**
-   * Lifecycle hook on creating new instance
+   * Lifecycle hook on creating new instance. In this phase you don't
+   * have access to dispatch anything, it is call on constructor of the class.
    * @internal
    */
   protected onCreate?(): void;
 
   /**
-   * Lifecycle hook on creating new instance
+   * Lifecycle hook on creating after reducers/listeners are registered. You
+   * can use dispatch to mutate initial state.
    * @internal
    */
-  protected onBeforeInit?(): void;
+  public onAfterInit?(): void;
 
   /**
    * Define selectors to use on pipe
@@ -101,18 +102,18 @@ export abstract class EssentialLink<State extends AnyState = any>
 
   constructor(key: SymbolID) {
     this.namespace = key;
+
+    if (this.onCreate) {
+      this.onCreate();
+    }
   }
 
   /**
    * Create redux slice and call hook
    * @internal
    */
-  public async initialize(emit = false) {
-    if (this.onCreate) {
-      this.onCreate();
-    }
-
-    return this.initSlice(emit);
+  public async initialize() {
+    return this.initSlice();
   }
 
   /**
@@ -165,8 +166,8 @@ export abstract class EssentialLink<State extends AnyState = any>
    * Creates and initialize state slice
    * @internal
    */
-  protected async initSlice(emit: boolean) {
-    const { initialState, namespace, onBeforeInit, sliceProps } = this;
+  protected async initSlice() {
+    const { initialState, namespace, sliceProps } = this;
     const reducers = this.getReducers();
     const actionInit = `@ACTION_INIT`;
 
@@ -185,16 +186,5 @@ export abstract class EssentialLink<State extends AnyState = any>
     });
 
     sliceProps.set(namespace, slice);
-
-    if (emit) {
-      const action = createAction<any, string>(
-        `${namespace.key.description}/@ACTION_INIT`
-      );
-      this.dispatch(action, initialState);
-    }
-
-    if (onBeforeInit) {
-      onBeforeInit.apply(this);
-    }
   }
 }

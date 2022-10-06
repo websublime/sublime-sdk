@@ -21,14 +21,26 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
   extends EssentialLink<State>
   implements Essential<State>
 {
+  /**
+   * Define the type of persistence
+   */
   abstract readonly storage: EssentialStorageType;
 
+  /**
+   * Storage driver
+   */
   private persistence!: Storage;
 
+  /**
+   * Storage key name
+   */
   get storageName() {
     return `ws:${this.namespace.key.description}`;
   }
 
+  /**
+   * Any change on links are persisted
+   */
   public async onChange(
     _oldState: State,
     newState: State,
@@ -37,6 +49,17 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     return await this.persistence.setItem(this.storageName, newState as any);
   }
 
+  /**
+   * Retrieve the actual persisted state
+   */
+  public async getPersistedState(): Promise<State> {
+    return (await this.persistence.getItem(this.storageName)) as State;
+  }
+
+  /**
+   * Defines the type of driver to use for
+   * persisting data.
+   */
   protected setupDriver() {
     let driver: any;
 
@@ -63,6 +86,9 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     });
   }
 
+  /**
+   * Instanciate the driver use.
+   */
   protected onCreate(): void {
     this.setupDriver();
   }
@@ -72,9 +98,8 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
    * @internal
    */
   protected async initSlice() {
-    const persistedState = (await this.persistence.getItem(
-      this.storageName
-    )) as State;
+    const persistedState = await this.getPersistedState();
+    const actionInit = `@ACTION_INIT`;
 
     const { initialState, namespace, sliceProps } = this;
     const reducers = this.getReducers();
@@ -87,7 +112,10 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
       },
       initialState: persistedState || initialState,
       name: namespace.key.description as string,
-      reducers
+      reducers: {
+        ...reducers,
+        [actionInit]: (state) => state
+      }
     });
 
     sliceProps.set(namespace, slice);

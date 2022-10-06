@@ -13,6 +13,7 @@ import {
   Store,
   combineReducers,
   configureStore,
+  createAction,
   createListenerMiddleware,
   createReducer,
   nanoid
@@ -96,7 +97,8 @@ export class EssentialStore {
   /**
    * Add links to registry and patch dispatch
    * from redux store. Having emit parameter true
-   * the namespace/init action will be trigger.
+   * the namespace/init action will be trigger so any subscription
+   * can react on adding a new link to the store.
    * @public
    */
   public async addLink<Link extends EssentialLink>(
@@ -130,7 +132,7 @@ export class EssentialStore {
 
     this.ids.push(link.namespace);
 
-    await link.initialize(emit);
+    await link.initialize();
 
     const linkReducer = {
       [link.namespace.key.description as string]: link.reducer
@@ -140,6 +142,17 @@ export class EssentialStore {
     this.store.replaceReducer(
       combineReducers({ ...cachedEntries, ...linkReducer })
     );
+
+    if (emit) {
+      const action = createAction<any, string>(
+        `${link.namespace.key.description}/@ACTION_INIT`
+      );
+      this.store.dispatch(action(link.initialState));
+    }
+
+    if (link.onAfterInit) {
+      link.onAfterInit();
+    }
   }
 
   /**
