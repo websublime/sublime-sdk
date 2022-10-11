@@ -1,5 +1,11 @@
 # @websublime/ws-globals
 
+## 0.3.0
+
+### Minor Changes
+
+- [#10](https://github.com/websublime/sublime-sdk/pull/10) [`4865444`](https://github.com/websublime/sublime-sdk/commit/48654448043cda1586a21980ae390b1cdd2aed1f) Thanks [@miguelramos](https://github.com/miguelramos)! - Persistence link and asyn initializations
+
 ## 0.2.0
 
 ### Minor Changes
