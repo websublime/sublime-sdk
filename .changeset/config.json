@@ -1,5 +1,5 @@
 {
-    "$schema": "https://unpkg.com/@changesets/config@1.5.0/schema.json",
+    "$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
     "changelog": [
       "@changesets/changelog-github",
       { "repo": "websublime/sublime-sdk" }
@@ -11,5 +11,8 @@
     "updateInternalDependencies": "patch",
     "ignore": [],
     "useCalculatedVersion": true,
-    "prereleaseTemplate": "{commit}-{tag}"
+    "prereleaseTemplate": "{commit}-{tag}",
+    "snapshot": {
+      "useCalculatedVersion": true
+    }
   }
