@@ -185,19 +185,18 @@ export class EssentialStore {
     return () => this.removeListener(linkID, id);
   }
 
-  // TODO: change to same signature as subscription (arrays)
   public pipe(
     linkID: SymbolID,
     callback: (results: Record<string, any>) => void
   ) {
-    const { link } = this.links.get(linkID) as LinkEntries<EssentialLink>;
-
-    if (link.getSelectors) {
-      this.pipes.set(link.namespace, {
-        callback,
-        ...link.getSelectors()
-      });
+    if (!this.pipes.has(linkID)) {
+      this.pipes.set(linkID, []);
     }
+
+    const pipes = this.pipes.get(linkID) as LinkPipes;
+    const id = nanoid();
+
+    pipes.push({ callback, id });
   }
 
   /**
@@ -263,11 +262,11 @@ export class EssentialStore {
           await executeSubscriptions();
         }
 
-        if (pipes) {
-          const { callback, ...rest } = pipes;
+        if (pipes && link.getSelectors) {
+          const selectors = link.getSelectors();
 
           const executePipe = async (accumulator: Record<string, any>) => {
-            for (const [key, selector] of Object.entries(rest)) {
+            for (const [key, selector] of Object.entries(selectors)) {
               const { value } = await executeGenerator(selector, state).next();
               accumulator[key] = value;
             }
@@ -277,7 +276,9 @@ export class EssentialStore {
 
           const results = await executePipe({});
 
-          callback(results);
+          for (const pipeCallback of pipes) {
+            pipeCallback.callback(results);
+          }
         }
 
         this.removeListener(link.namespace);

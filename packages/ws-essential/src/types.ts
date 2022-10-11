@@ -28,10 +28,11 @@ export type LinkSubscriptions = Array<{
   id: string;
 }>;
 
-export type LinkPipes = {
-  callback: (results: Record<keyof Omit<LinkPipes, 'callback'>, any>) => void;
-  [key: string]: (state: AnyState) => unknown;
-};
+export type LinkPipes = Array<{
+  //callback: (results: Record<keyof Omit<LinkPipes, 'callback'>, any>) => void;
+  id: string;
+  callback: (result: AnyState) => unknown;
+}>;
 
 export type LinkUnsubscribe = () => void;
 
