@@ -17,6 +17,8 @@
   "scripts": {
     "build": "turbo run build",
     "release": "yarn changeset publish",
+    "version:dev": "changeset version --snapshot dev-snapshot",
+    "release:dev": "changeset publish --tag dev-snapshot",
     "start:essential": "turbo run start --filter=@websublime/ws-essential",
     "build:essential": "turbo run build --filter=@websublime/ws-essential",
     "test:essential": "turbo run test --filter=@websublime/ws-essential"

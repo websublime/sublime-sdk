@@ -45,8 +45,8 @@ jobs:
       - name: Create Snapshot
         uses: changesets/action@v1
         with:
-          version: yarn changeset version --snapshot SNAPSHOT
-          publish: yarn changeset publish --tag SNAPSHOT
+          version: yarn version:dev
+          publish: yarn release:dev
           title: "chore(snapshot): Packages snapshots"
           commit: "chore(snapshot): releasing snapshot preview"
         env:
