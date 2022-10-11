@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 /**
  * Copyright Websublime All Rights Reserved.
  *
@@ -6,8 +7,8 @@
  */
 import { AnyAction, createSlice } from '@reduxjs/toolkit';
 import { Storage, createStorage } from 'unstorage';
-import localStorageDriver from 'unstorage/drivers/localstorage';
-import memoryDriver from 'unstorage/drivers/memory';
+// import localStorageDriver from 'unstorage/drivers/localstorage';
+// import memoryDriver from 'unstorage/drivers/memory';
 
 import { EssentialLink } from './link';
 import {
@@ -16,6 +17,20 @@ import {
   EssentialStorage,
   EssentialStorageType
 } from './types';
+
+async function drivers() {
+  const localStorageDriver = await import(
+    'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/localstorage.js'
+  );
+  const memoryDriver = await import(
+    'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/memory.js'
+  );
+
+  return {
+    localStorageDriver: localStorageDriver.default,
+    memoryDriver: memoryDriver.default
+  };
+}
 
 export abstract class EssentialLinkStorage<State extends AnyState = any>
   extends EssentialLink<State>
@@ -60,7 +75,9 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
    * Defines the type of driver to use for
    * persisting data.
    */
-  protected setupDriver() {
+  protected async setupDriver() {
+    const { localStorageDriver, memoryDriver } = await drivers();
+
     let driver: any;
 
     switch (this.storage) {
@@ -86,11 +103,10 @@ export abstract class EssentialLinkStorage<State extends AnyState = any>
     });
   }
 
-  /**
-   * Instanciate the driver use.
-   */
-  protected onCreate(): void {
-    this.setupDriver();
+  public async initialize() {
+    await this.setupDriver();
+
+    return this.initSlice();
   }
 
   /**

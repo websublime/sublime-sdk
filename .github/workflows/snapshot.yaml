@@ -46,7 +46,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn changeset version --snapshot SNAPSHOT
-          publish: yarn changeset publish --tag PR-${{ github.sha }} --no-git-tag --snapshot
+          publish: yarn changeset publish --tag SNAPSHOT
           title: "chore(snapshot): Packages snapshots"
           commit: "chore(snapshot): releasing snapshot preview"
         env:

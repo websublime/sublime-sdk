@@ -22,7 +22,11 @@
       "baseUrl": ".",
       "paths": {
         "*": ["./types/*", "*"],
-        "@websublime/ws-essential/*": ["./src/*"]
+        "@websublime/ws-essential/*": ["./src/*"],
+        "@reduxjs/toolkit": ["../../node_modules/@reduxjs/toolkit/dist/index.d.ts"],
+        "unstorage": ["../../node_modules/unstorage/dist/index.d.ts"],
+        "https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/localstorage.js": ["../../node_modules/unstorage/dist/drivers/localstorage.d.ts"],
+        "https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/memory.js": ["../../node_modules/unstorage/dist/drivers/memory.d.ts"]
       },
       "declarationDir": "./declarations",
       "removeComments": false,
