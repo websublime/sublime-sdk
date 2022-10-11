@@ -34,7 +34,12 @@ module.exports = defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: [],
+      external: [
+        '@reduxjs/toolkit',
+        'unstorage',
+        'unstorage/drivers/localstorage',
+        'unstorage/drivers/memory'
+      ],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
@@ -69,7 +74,20 @@ module.exports = defineConfig({
     })
     //workspacesAlias(['../../'], ['vite'])
   ],
+  resolve: {
+    alias: {
+      '@reduxjs/toolkit':
+        'https://esm.sh/v96/@reduxjs/toolkit@1.8.5/es2022/toolkit.js',
+      unstorage: 'https://esm.sh/v94/unstorage@0.5.6/es2022/unstorage.js'
+    }
+  },
   optimizeDeps: {
-    include: ['@reduxjs/toolkit', 'redux']
+    exclude: [
+      '@reduxjs/toolkit',
+      'unstorage',
+      'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/localstorage.js',
+      'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/memory.js'
+    ],
+    include: ['redux']
   }
 });
