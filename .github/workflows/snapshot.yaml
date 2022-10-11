@@ -49,6 +49,7 @@ jobs:
           publish: yarn release:dev
           title: "chore(snapshot): Packages snapshots"
           commit: "chore(snapshot): releasing snapshot preview"
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.GH_TOKEN }}
