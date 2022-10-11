@@ -1,7 +1,7 @@
 {
   "name": "@websublime/ws-essential",
   "private": false,
-  "version": "0.3.0",
+  "version": "0.4.0-SNAPSHOT-817396e",
   "source": "./src",
   "scripts": {
     "start": "vite --debug",
