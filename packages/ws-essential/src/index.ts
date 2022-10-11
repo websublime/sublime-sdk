@@ -19,6 +19,7 @@ declare global {
 
   interface Window {
     essential: EssentialStoreObject;
+    __REDUX_DEVTOOLS_EXTENSION_LOCKED__: boolean;
   }
 }
 
@@ -37,8 +38,10 @@ const isStoreAvailable = () => {
  */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
   if (!context.essential) {
+    const environment = process.env.NODE_ENV || 'production';
+
     const options = {
-      devTools: import.meta.env.DEV,
+      devTools: environment !== 'production',
       ...storeOptions
     };
 
@@ -54,7 +57,10 @@ export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
 
 export { nanoid } from '@reduxjs/toolkit';
 export { EssentialLink } from './link';
+export { EssentialLinkStorage } from './storage';
+export { EssentialStorage } from './types';
+export { createSymbolID } from './helpers';
 // eslint-disable-next-line prettier/prettier
 export type { PayloadAction } from '@reduxjs/toolkit';
 // eslint-disable-next-line prettier/prettier
-export type { SymbolID, Essential } from './types';
+export type { SymbolID, Essential, EssentialStorageType } from './types';

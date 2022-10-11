@@ -74,8 +74,41 @@ dispacther.publish('Hello World');
 
 The ```store``` is a empty redux store, ready to accept links on it. Add your new slice state to the store by adding a link like: ```store.addLink(new BarLink(BarLinkID))```, now you can subscribe to changes that happen on that namespace and also get the dispatchers to make changes on the namespace state.
 
+If you need to persist your state, just use class `EssentialLinkStorage` as the extender class.
 
+```
+import { EssentialLinkStorage, EssentialStorage } from '@websublime/ws-essential';
 
+class FooLink extends EssentialLinkStorage {
+  get initialState(): FooState {
+    return {
+      count: 0
+    };
+  }
+
+  get storage() {
+    return EssentialStorage.LOCAL;
+  }
+
+  protected definedActions() {
+    return {
+      decrement: this.decrement,
+      increment: this.increment
+    };
+  }
+
+  private increment(state: FooState, action: PayloadAction<number>) {
+    state.count = state.count + action.payload;
+  }
+
+  private decrement(state: FooState, action: PayloadAction<number>) {
+    state.count = state.count - action.payload;
+  }
+}
+```
+
+Storage can be local(localStorage) or memory(Object).
+ 
 [(Back to top)](#table-of-contents)
 
 # Installation

@@ -5,16 +5,24 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-import { AnyAction, Slice, createSlice } from '@reduxjs/toolkit';
+import {
+  ActionCreatorWithPayload,
+  ActionCreatorWithoutPayload,
+  AnyAction,
+  Slice,
+  createSlice
+} from '@reduxjs/toolkit';
 
 // eslint-disable-next-line prettier/prettier
 import type { AnyState, Essential, ReducerFunction, SymbolID } from './types';
 
 /**
- * Essential link is a link slcie constructor to expose dispatcher on slice state
+ * Essential link is a link slice constructor to expose dispatcher on slice state
  * @public
  */
-export abstract class EssentialLink<State extends AnyState = any> implements Essential<State> {
+export abstract class EssentialLink<State extends AnyState = any>
+  implements Essential<State>
+{
   /**
    * Slice initial state
    * @public
@@ -28,41 +36,63 @@ export abstract class EssentialLink<State extends AnyState = any> implements Ess
   public namespace: SymbolID;
 
   /**
-   * Define public actions
-   * @internal
+   * Public functions to mutate state
+   * @public
    */
-  protected abstract definedActions(): Record<string, ReducerFunction>;
+  public abstract getDispatchers(): Record<string, Function>;
 
   /**
-   * Lifecycle hook on creating new instance
+   * Define public reducers
    * @internal
    */
-  protected bootstrap?(): void;
+  protected abstract getReducers(): Record<string, ReducerFunction>;
+
+  /**
+   * Lifecycle hook on creating new instance. In this phase you don't
+   * have access to dispatch anything, it is call on constructor of the class.
+   * @internal
+   */
+  protected onCreate?(): void;
+
+  /**
+   * Lifecycle hook on creating after reducers/listeners are registered. You
+   * can use dispatch to mutate initial state.
+   * @internal
+   */
+  public onAfterInit?(): void;
+
+  /**
+   * Define selectors to use on pipe
+   * @public
+   */
+  public getSelectors?(): Record<string, (state: State) => unknown>;
 
   /**
    * Slice descriptor properties
    * @internal
    */
-  private sliceProps = new WeakMap<SymbolID, Slice<State>>();
+  protected sliceProps = new WeakMap<SymbolID, Slice<State>>();
 
   /**
-   * Public dispatchers
-   * @readonly
+   * Reference to original store.dispatch
+   * @public
    */
-  get dispatchers() {
-    const dispatchers = {};
-
-    for (const [key, property] of Object.entries(this.actions)) {
-      dispatchers[key] = (payload?: any) =>
-        this.dispatch(property.call(property, payload));
-    }
-
-    return dispatchers;
+  protected dispatch<Payload = any>(
+    action:
+      | ActionCreatorWithPayload<Payload, string>
+      | ActionCreatorWithoutPayload,
+    payload?: Payload
+  ): void {
+    console.error(action, payload);
+    throw new Error(
+      'Dispatch is only available when class is added to the store'
+    );
   }
 
   /**
    * Public main reducer
    * @readonly
+   * @internal
    */
   get reducer() {
     const properties = this.sliceProps.get(this.namespace) as Slice<State>;
@@ -70,56 +100,89 @@ export abstract class EssentialLink<State extends AnyState = any> implements Ess
     return properties.reducer;
   }
 
-  /**
-   * Public actions
-   * @readonly
-   */
-  get actions() {
-    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
-
-    return properties.actions;
-  }
-
   constructor(key: SymbolID) {
     this.namespace = key;
 
-    this.initSlice();
-
-    if (this.bootstrap) {
-      this.bootstrap();
+    if (this.onCreate) {
+      this.onCreate();
     }
   }
 
   /**
-   * Hook on any sate change
-   */
-  public change?(oldState: State, newState: State, action: AnyAction): void;
-
-  /**
-   * Dispatch actions
+   * Create redux slice and call hook
    * @internal
    */
-  protected dispatch(_action?: AnyAction) {
-    console.error('Class must be registered thru EssentialLink store');
+  public async initialize() {
+    return this.initSlice();
+  }
+
+  /**
+   * Hook on any slice state change
+   * @public
+   */
+  public async onChange?(
+    oldState: State,
+    newState: State,
+    action: AnyAction
+  ): Promise<void>;
+
+  /**
+   * Verify if action key exists
+   * @public
+   */
+  public hasActionType(key: string) {
+    const hasNamespace = key.includes(this.namespace.key.description as string);
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+    const actionKey = hasNamespace
+      ? key
+      : `${this.namespace.key.description}/${key}`;
+
+    return Object.entries(properties.actions).some(
+      ([_key, property]) => property.type === actionKey
+    );
+  }
+
+  /**
+   * Get action reference for the reducer
+   * @public
+   */
+  protected getActionType(key: string) {
+    const id = `${this.namespace.key.description}/${key}`;
+    const properties = this.sliceProps.get(this.namespace) as Slice<State>;
+
+    const action = Object.entries(properties.actions).find(
+      ([_key, property]) => property.type === id
+    );
+
+    if (!action) {
+      throw new Error(`Action type: ${key} invalid.`);
+    }
+
+    const [_actionKey, actionType] = action;
+    return actionType;
   }
 
   /**
    * Creates and initialize state slice
    * @internal
    */
-  private initSlice() {
+  protected async initSlice() {
     const { initialState, namespace, sliceProps } = this;
-    const reducers = this.definedActions();
+    const reducers = this.getReducers();
+    const actionInit = `@ACTION_INIT`;
 
     const slice = createSlice({
-      extraReducers: builder => {
-        builder.addDefaultCase(state => {
+      extraReducers: (builder) => {
+        builder.addDefaultCase((state) => {
           return state;
         });
       },
       initialState,
-      name: namespace.key.toString(),
-      reducers
+      name: namespace.key.description as string,
+      reducers: {
+        ...reducers,
+        [actionInit]: (state) => state
+      }
     });
 
     sliceProps.set(namespace, slice);

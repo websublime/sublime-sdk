@@ -31,15 +31,6 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Artifacts
-        run: |
-          wget https://github.com/websublime/sublime-cli/releases/download/v0.1.8/sublime-v0.1.8-linux-amd64.tar.gz
-          tar -xf sublime-v0.1.8-linux-amd64.tar.gz sublime
-          chmod +x sublime
-          ./sublime action --type branch --env "$NODE_ENV"
-          rm -rf sublime-v0.1.8-linux-amd64.tar.gz
-          rm -rf sublime
-
       - name: Setup CI Git User
         run: |
           git config --global user.name "miguelramos"
@@ -54,10 +45,11 @@ jobs:
       - name: Create Snapshot
         uses: changesets/action@v1
         with:
-          version: yarn changeset version --snapshot SNAPSHOT
-          publish: yarn changeset publish --no-git-tag --snapshot
+          version: yarn version:dev
+          publish: yarn release:dev
           title: "chore(snapshot): Packages snapshots"
           commit: "chore(snapshot): releasing snapshot preview"
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.GH_TOKEN }}

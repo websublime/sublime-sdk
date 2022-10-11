@@ -1,5 +1,6 @@
-import { PayloadAction, nanoid } from '@reduxjs/toolkit';
+import { PayloadAction } from '@reduxjs/toolkit';
 
+import { createSymbolID } from './helpers';
 import { EssentialLink } from './link';
 import { EssentialStore } from './store';
 
@@ -12,10 +13,13 @@ describe('> Link to EssentialStore', () => {
     });
   });
 
-  test('# It should create a essential link class', () => {
-    const FooLinkID = { key: Symbol(nanoid()) };
+  test('# It should create a essential link class', async () => {
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
+
     type FooDispatchers = {
       increment: (value: number) => void;
       decrement: (value: number) => void;
@@ -28,25 +32,38 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch<number>(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch<number>(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
     const fooLink = new FooLink(FooLinkID);
 
-    store.addLink(fooLink);
+    await store.addLink(fooLink);
     store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
     });
@@ -56,10 +73,12 @@ describe('> Link to EssentialStore', () => {
     increment(1);
   });
 
-  test('# It should call change', async () => {
+  test('# It should call onChange', async () => {
     expect.assertions(4);
 
-    const FooLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
     type FooDispatchers = {
@@ -74,22 +93,35 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
 
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
-      }
-
-      public change(
+      public async onChange(
         oldState: FooState,
         newState: FooState,
         action: PayloadAction<any>
@@ -98,15 +130,15 @@ describe('> Link to EssentialStore', () => {
         expect(newState).toEqual({ count: -1 });
         expect(action).toEqual({
           payload: 1,
-          type: `${FooLinkID.key.toString()}/decrement`
+          type: `${FooLinkID.key.description}/${ACTION_DECREMENT}`
         });
       }
     }
 
-    const spyChange = jest.spyOn(FooLink.prototype, 'change');
+    const spyChange = jest.spyOn(FooLink.prototype, 'onChange');
     const fooLink = new FooLink(FooLinkID);
 
-    store.addLink(fooLink);
+    await store.addLink(fooLink);
     const { decrement } = store.getDispatchers<FooDispatchers>(FooLinkID);
 
     decrement(1);
@@ -119,8 +151,12 @@ describe('> Link to EssentialStore', () => {
   test('# It should create multiple links', async () => {
     expect.assertions(2);
 
-    const FooLinkID = { key: Symbol(nanoid()) };
-    const BarLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+    const BarLinkID = createSymbolID('BAR-LINK');
+    const ACTION_PUBLISH = 'ACTION_PUBLISH';
 
     type FooState = { count: number };
     type BarState = { message: string };
@@ -141,19 +177,32 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
-      }
-
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
     }
 
@@ -164,22 +213,31 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      getDispatchers() {
         return {
-          publish: this.publish
+          publish: (value: string) => {
+            this.dispatch(this.getActionType(ACTION_PUBLISH), value);
+          }
         };
       }
 
-      private publish(state: BarState, action: PayloadAction<string>) {
-        state.message = action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_PUBLISH]: (
+            state: BarState,
+            action: PayloadAction<string>
+          ) => {
+            state.message = action.payload;
+          }
+        };
       }
     }
 
     const fooLink = new FooLink(FooLinkID);
     const barLink = new BarLink(BarLinkID);
 
-    store.addLink(fooLink);
-    store.addLink(barLink);
+    await store.addLink(fooLink);
+    await store.addLink(barLink);
 
     store.subscribe(FooLinkID, (state: FooState) => {
       expect(state).toEqual({ count: 1 });
@@ -196,10 +254,12 @@ describe('> Link to EssentialStore', () => {
     publish('Hello World');
   });
 
-  test('# It should call bootstrap', async () => {
+  test('# It should call onCreate', async () => {
     expect.assertions(2);
 
-    const FooLinkID = { key: Symbol(nanoid()) };
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
 
     type FooState = { count: number };
 
@@ -210,31 +270,183 @@ describe('> Link to EssentialStore', () => {
         };
       }
 
-      protected definedActions() {
+      getDispatchers() {
         return {
-          decrement: this.decrement,
-          increment: this.increment
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
         };
       }
 
-      private increment(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count + action.payload;
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
       }
 
-      private decrement(state: FooState, action: PayloadAction<number>) {
-        state.count = state.count - action.payload;
-      }
-
-      public bootstrap() {
+      public onCreate() {
         expect(true).toBeTruthy();
       }
     }
 
-    const spyBootstrap = jest.spyOn(FooLink.prototype, 'bootstrap');
-    new FooLink(FooLinkID);
+    const spyBootstrap = jest.spyOn(FooLink.prototype, 'onCreate');
+    const fooLink = new FooLink(FooLinkID);
+
+    await store.addLink(fooLink);
 
     expect(spyBootstrap).toHaveBeenCalledTimes(1);
 
     spyBootstrap.mockClear();
+  });
+
+  test('# It should emit when adding a link to store', async () => {
+    expect.assertions(1);
+
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+    type FooState = { count: number };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      getDispatchers() {
+        return {
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: async (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
+        };
+      }
+
+      getSelectors() {
+        return {
+          isPositive: (state: FooState) => state.count > 0,
+          isNegative: (state: FooState) => state.count < 0,
+          isNeutral: (state: FooState) => state.count === 0
+        };
+      }
+
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
+      }
+    }
+
+    const unsubscribe = store.subscribe(FooLinkID, (state: FooState) => {
+      expect(state).toEqual({ count: 0 });
+      unsubscribe();
+    });
+
+    const fooLink = new FooLink(FooLinkID);
+    await store.addLink(fooLink, true);
+  });
+
+  test('# It should pipe selectors results', async () => {
+    expect.assertions(9);
+
+    const FooLinkID = createSymbolID('FOO-LINK');
+    const ACTION_DECREMENT = 'ACTION_DECREMENT';
+    const ACTION_INCREMENT = 'ACTION_INCREMENT';
+
+    type FooState = { count: number };
+    type FooDispatchers = {
+      increment: (value: number) => void;
+      decrement: (value: number) => void;
+    };
+
+    class FooLink extends EssentialLink {
+      get initialState(): FooState {
+        return {
+          count: 0
+        };
+      }
+
+      getDispatchers() {
+        return {
+          decrement: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_DECREMENT), value);
+          },
+          increment: (value: number) => {
+            this.dispatch(this.getActionType(ACTION_INCREMENT), value);
+          }
+        };
+      }
+
+      getSelectors() {
+        return {
+          isPositive: (state: FooState) => state.count > 0,
+          isNegative: (state: FooState) => state.count < 0,
+          isNeutral: async (state: FooState) => state.count === 0
+        };
+      }
+
+      protected getReducers() {
+        return {
+          [ACTION_DECREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count - action.payload;
+          },
+          [ACTION_INCREMENT]: (
+            state: FooState,
+            action: PayloadAction<number>
+          ) => {
+            state.count = state.count + action.payload;
+          }
+        };
+      }
+    }
+
+    const fooLink = new FooLink(FooLinkID);
+
+    await store.addLink(fooLink, true);
+
+    const { decrement, increment } =
+      store.getDispatchers<FooDispatchers>(FooLinkID);
+
+    store.pipe(FooLinkID, (results) => {
+      expect(results.hasOwnProperty('isPositive')).toBe(true);
+      expect(results.hasOwnProperty('isNegative')).toBe(true);
+      expect(results.hasOwnProperty('isNeutral')).toBe(true);
+    });
+
+    increment(2);
+    decrement(3);
+    increment(1);
   });
 });

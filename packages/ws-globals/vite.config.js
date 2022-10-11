@@ -17,11 +17,7 @@ module.exports = defineConfig({
   },
   define: {
     Version: JSON.stringify(version),
-    global: 'globalThis',
-    'globalThis.process.env.NODE_ENV':
-      process.env.NODE_ENV === 'production'
-        ? JSON.stringify('production')
-        : JSON.stringify('development')
+    global: 'globalThis'
   },
   build: {
     lib: {
