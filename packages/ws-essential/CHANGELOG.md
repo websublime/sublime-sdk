@@ -1,5 +1,11 @@
 # @websublime/ws-essential
 
+## 0.4.1
+
+### Patch Changes
+
+- [#23](https://github.com/websublime/sublime-sdk/pull/23) [`0016032`](https://github.com/websublime/sublime-sdk/commit/00160322065041917f29d52d31d5d4980eddff10) Thanks [@miguelramos](https://github.com/miguelramos)! - Update readme file
+
 ## 0.4.0
 
 ### Minor Changes
