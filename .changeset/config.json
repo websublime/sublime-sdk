@@ -1,18 +1,18 @@
 {
-    "$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
-    "changelog": [
-      "@changesets/changelog-github",
-      { "repo": "websublime/sublime-sdk" }
-    ],
-    "commit": false,
-    "linked": [],
-    "access": "public",
-    "baseBranch": "main",
-    "updateInternalDependencies": "patch",
-    "ignore": [],
+  "$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "websublime/sublime-sdk" }
+  ],
+  "commit": false,
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [],
+  "useCalculatedVersion": true,
+  "snapshot": {
     "useCalculatedVersion": true,
-    "snapshot": {
-      "useCalculatedVersion": true,
-      "prereleaseTemplate": "{tag}-{commit}"
-    }
+    "prereleaseTemplate": "{tag}-{commit}"
   }
+}
