@@ -30,7 +30,12 @@ module.exports = defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: [],
+      external: [
+        '@websublime/ws-essential',
+        'unstorage',
+        'unstorage/drivers/localstorage',
+        'unstorage/drivers/memory'
+      ],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
@@ -61,5 +66,13 @@ module.exports = defineConfig({
       inject: false
     })
     //workspacesAlias(['../../'], ['vite', '@websublime/ws-essential'])
-  ]
+  ],
+  resolve: {
+    alias: {
+      '@reduxjs/toolkit':
+        'https://esm.sh/v96/@reduxjs/toolkit@1.8.5/es2022/toolkit.js',
+      unstorage: 'https://esm.sh/v94/unstorage@0.5.6/es2022/unstorage.js',
+      '@websublime/ws-essential': 'https://cdn.websublime.dev/g/@websublime/ws-essential@0.4.1/dist/ws-essential.es.js'
+    }
+  },
 });
