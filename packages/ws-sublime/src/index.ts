@@ -5,41 +5,19 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-import { PluginID, SublimeContext, Plugin, Change, ChangeArgs, AnyRecord } from './types';
+import { PluginID, SublimeContext, Plugin, Change, ChangeArgs } from './types';
 import { version } from './version';
 
 declare global {
   interface Window {
     Sublime: SublimeContext;
   }
+
+  var Sublime: SublimeContext;
 }
 
 const isWindow = () => typeof window !== 'undefined';
 const ChangesID = {key: Symbol('CHANGES')};
-
-//TODO: Poc for plugin
-abstract class Plug implements Plugin {
-  constructor() {
-    return new Proxy(this, {
-      get(target, propKey, receiver) {
-        const targetValue = Reflect.get(target, propKey, receiver);
-
-        //TODO: access to globalContext
-
-        if (typeof targetValue === 'function') {
-          return function(...args) {
-            console.log('CALL', propKey, args);
-            return targetValue.apply(target, args); //this
-          }
-        } else {
-          return targetValue;
-        }
-      }
-    });
-  }
-
-  abstract install<Option = AnyRecord>(options?: Option): void;
-}
 
 const globalContext = () => {
   const context = new Map();
@@ -55,28 +33,52 @@ const globalContext = () => {
   };
 
   return {
-    remove: (id: PluginID) => {
-      const plugin = plugins.get(id);
-      plugins.delete(id);
-      emitChange({ property: id, value: plugin, action: 'remove' });
-    },
     use: function (id: PluginID, plugin: Plugin, options = {}) {
-      plugin.install.call(this, options); //Call or bind?
+      const self = new Proxy(this, {
+        get(target, propKey, receiver) {
+          const targetValue = Reflect.get(target, propKey, receiver);
+  
+          if (typeof targetValue === 'function') {
+            return function(...args) {
+              return targetValue.apply(target, args);
+            }
+          } else {
+            return targetValue;
+          }
+        },
+        set(target, p, newValue, receiver) {
+          emitChange({ property: p as string, value: newValue, action: 'set' });
+          return Reflect.set(target, p, newValue, receiver);
+        },
+      });
+
+      plugin.install.call(self, options);
       
       plugins.set(id, plugin);
       
       emitChange({ property: id, value: plugin, action: 'use' });
     },
-    get: (key: string) => {
-      return context.get(key);
+    get: (key: PluginID|string) => {
+      return typeof key === 'object' ? plugins.get(key) : context.get(key);
     },
     set: (key: string, value: unknown) => {
       context.set(key, value);
       
       emitChange({ property: key, value, action: 'set' });
     },
-    has: (key: string) => {
-      return context.has(key);
+    has: (key: PluginID|string) => {
+      return typeof key === 'object' ? plugins.has(key) : context.has(key);
+    },
+    remove: (id: PluginID|string) => {
+      let result = false;
+
+      if (typeof id === 'object') {
+        result = plugins.delete(id);
+      } else {
+        result = context.delete(id);
+      }
+      
+      emitChange({ property: id, value: result, action: 'remove' });
     },
     onChange: (fn: Change) => {
       const subscription = listeners.get(ChangesID);
@@ -94,11 +96,10 @@ const useSublime = (): SublimeContext => {
     globalThis.Sublime = globalContext();
   }
 
+  globalThis.Sublime.set('isWindow', isWindow());
+
   return globalThis.Sublime;
 };
 
-if (isWindow()) {
-  useSublime();
-}
-
-export { createPluginID, useSublime, Plug };
+export { createPluginID, useSublime };
+export type { SublimeContext };

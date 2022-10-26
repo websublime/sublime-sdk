@@ -19,11 +19,11 @@ export interface Plugin {
 }
 
 export interface SublimeContext {
-  get: <T = any>(key: string) => T;
+  get: <T = any>(key: PluginID|string) => T;
   set: <T = any>(key: string, value: T) => void;
-  has: (key: string) => boolean;
+  has: (key: PluginID|string) => boolean;
   use: (id: PluginID, plugin: Plugin, options?: AnyRecord) => void;
-  remove: (id: PluginID) => void;
+  remove: (id: PluginID|string) => void;
   onChange: (fn: (arg: ChangeArgs) => void) => void;
   version: string;
 };

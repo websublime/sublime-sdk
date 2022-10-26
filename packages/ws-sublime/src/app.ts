@@ -16,8 +16,6 @@ declare module './types' {
 function app() {
   const sublime = useSublime();
 
-  sublime.onChange((changes) => console.dir(changes));
-
   sublime.use(createPluginID('DUMMY'), {
     install() {
       this.onChange((changes) => {
@@ -33,6 +31,8 @@ function app() {
     api: 'localhost',
     origin: 'http://www.localhost.com'
   });
+
+  console.dir(sublime.dummy);
 }
 
 app();
