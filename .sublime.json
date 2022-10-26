@@ -20,6 +20,13 @@
    "scope": "@websublime",
    "type": "pkg",
    "description": "Sublime globals"
+  },
+  {
+   "id": "9c82d6d5-2425-481e-90d7-f85f96cb796e",
+   "name": "ws-sublime",
+   "scope": "@websublime",
+   "type": "pkg",
+   "description": "Global sublime context"
   }
  ]
 }
