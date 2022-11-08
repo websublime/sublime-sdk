@@ -5,7 +5,13 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 
-import { PluginID, SublimeContext, Plugin, Change, ChangeArgs } from './types';
+import {
+  Change,
+  ChangeArgs as ChangeArguments,
+  Plugin,
+  PluginID,
+  SublimeContext
+} from './types';
 import { version } from './version';
 
 declare global {
@@ -17,76 +23,72 @@ declare global {
 }
 
 const isWindow = () => typeof window !== 'undefined';
-const ChangesID = {key: Symbol('CHANGES')};
+const ChangesID = { key: Symbol('CHANGES') };
 
 const globalContext = () => {
   const context = new Map();
 
   const plugins = new WeakMap();
 
-  const listeners = new WeakMap([[ChangesID, [] as Array<Change>]])
+  const listeners = new WeakMap([[ChangesID, [] as Array<Change>]]);
 
-  const emitChange = (args: ChangeArgs) => {
+  const emitChange = (arguments_: ChangeArguments) => {
     const subscription = listeners.get(ChangesID);
 
-    subscription?.forEach(fn => fn(args))
+    if (subscription)
+      for (const function_ of subscription) function_(arguments_);
   };
 
   return {
-    use: function (id: PluginID, plugin: Plugin, options = {}) {
+    get: (key: PluginID | string) => {
+      return typeof key === 'object' ? plugins.get(key) : context.get(key);
+    },
+    has: (key: PluginID | string) => {
+      return typeof key === 'object' ? plugins.has(key) : context.has(key);
+    },
+    onChange: (function_: Change) => {
+      const subscription = listeners.get(ChangesID);
+
+      subscription?.push(function_);
+    },
+    plugin: function (id: PluginID, plugin: Plugin, options = {}) {
       const self = new Proxy(this, {
-        get(target, propKey, receiver) {
-          const targetValue = Reflect.get(target, propKey, receiver);
-  
-          if (typeof targetValue === 'function') {
-            return function(...args) {
-              return targetValue.apply(target, args);
-            }
-          } else {
-            return targetValue;
-          }
+        get(target, propertyKey, receiver) {
+          const targetValue = Reflect.get(target, propertyKey, receiver);
+
+          return typeof targetValue === 'function'
+            ? function (...arguments_) {
+                return targetValue.apply(target, arguments_);
+              }
+            : targetValue;
         },
+        // eslint-disable-next-line max-params
         set(target, p, newValue, receiver) {
-          emitChange({ property: p as string, value: newValue, action: 'set' });
+          emitChange({ action: 'set', property: p as string, value: newValue });
           return Reflect.set(target, p, newValue, receiver);
-        },
+        }
       });
 
       plugin.install.call(self, options);
-      
+
       plugins.set(id, plugin);
-      
-      emitChange({ property: id, value: plugin, action: 'use' });
+
+      emitChange({ action: 'plugin', property: id, value: plugin });
     },
-    get: (key: PluginID|string) => {
-      return typeof key === 'object' ? plugins.get(key) : context.get(key);
+    remove: (id: PluginID | string) => {
+      let result = false;
+
+      result = typeof id === 'object' ? plugins.delete(id) : context.delete(id);
+
+      emitChange({ action: 'remove', property: id, value: result });
     },
     set: (key: string, value: unknown) => {
       context.set(key, value);
-      
-      emitChange({ property: key, value, action: 'set' });
-    },
-    has: (key: PluginID|string) => {
-      return typeof key === 'object' ? plugins.has(key) : context.has(key);
-    },
-    remove: (id: PluginID|string) => {
-      let result = false;
 
-      if (typeof id === 'object') {
-        result = plugins.delete(id);
-      } else {
-        result = context.delete(id);
-      }
-      
-      emitChange({ property: id, value: result, action: 'remove' });
-    },
-    onChange: (fn: Change) => {
-      const subscription = listeners.get(ChangesID);
-
-      subscription?.push(fn);
+      emitChange({ action: 'set', property: key, value });
     },
     version
-  } as SublimeContext
+  } as SublimeContext;
 };
 
 const createPluginID = (key: string): PluginID => ({ key: Symbol(key) });
@@ -102,4 +104,5 @@ const useSublime = (): SublimeContext => {
 };
 
 export { createPluginID, useSublime };
-export type { SublimeContext };
+
+export { type SublimeContext } from './types';

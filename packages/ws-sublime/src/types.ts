@@ -10,8 +10,12 @@ export type PluginID = {
   key: symbol;
 };
 
-export type ChangeArgs = { property: string|PluginID, value: any, action: keyof SublimeContext };
-export type Change = (args: ChangeArgs) => void;
+export type ChangeArgs = {
+  property: string | PluginID;
+  value: any;
+  action: keyof SublimeContext;
+};
+export type Change = (arguments_: ChangeArgs) => void;
 
 export interface Plugin {
   // TODO: describe this to have access to context and plugin
@@ -19,11 +23,11 @@ export interface Plugin {
 }
 
 export interface SublimeContext {
-  get: <T = any>(key: PluginID|string) => T;
+  get: <T = any>(key: PluginID | string) => T;
+  has: (key: PluginID | string) => boolean;
+  onChange: (function_: (argument: ChangeArgs) => void) => void;
+  plugin: (id: PluginID, plugin: Plugin, options?: AnyRecord) => void;
+  remove: (id: PluginID | string) => void;
   set: <T = any>(key: string, value: T) => void;
-  has: (key: PluginID|string) => boolean;
-  use: (id: PluginID, plugin: Plugin, options?: AnyRecord) => void;
-  remove: (id: PluginID|string) => void;
-  onChange: (fn: (arg: ChangeArgs) => void) => void;
   version: string;
-};
+}

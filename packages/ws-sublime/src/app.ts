@@ -4,7 +4,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://websublime.dev/license
  */
-import { useSublime, createPluginID } from './index';
+import { createPluginID, useSublime } from './index';
 
 // Augmenting example
 declare module './types' {
@@ -16,10 +16,10 @@ declare module './types' {
 function app() {
   const sublime = useSublime();
 
-  sublime.use(createPluginID('DUMMY'), {
+  sublime.plugin(createPluginID('DUMMY'), {
     install() {
       this.onChange((changes) => {
-        console.log('Plugin internal', changes);
+        console.info('Plugin internal', changes);
       });
 
       this.dummy = 'Hello World';
@@ -27,12 +27,12 @@ function app() {
   });
 
   sublime.set('environment', {
-    env: 'dev',
     api: 'localhost',
+    env: 'dev',
     origin: 'http://www.localhost.com'
   });
 
-  console.dir(sublime.dummy);
+  console.info(sublime.dummy);
 }
 
 app();

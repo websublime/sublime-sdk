@@ -29,6 +29,7 @@
       "incremental": true,
       "composite": true
     },
+    "buildOptions": {"force": true},
     "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "types/**/*.d.ts"],
     "extends": "../../tsconfig.base.json",
     "references": [

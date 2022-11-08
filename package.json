@@ -22,7 +22,8 @@
     "start:essential": "turbo run start --filter=@websublime/ws-essential",
     "build:essential": "turbo run build --filter=@websublime/ws-essential",
     "test:essential": "turbo run test --filter=@websublime/ws-essential",
-    "start:sublime": "turbo run start --filter=@websublime/ws-sublime"
+    "start:sublime": "turbo run start --filter=@websublime/ws-sublime",
+    "build:sublime": "turbo run build --filter=@websublime/ws-sublime"
   },
   "devDependencies": {
     "turbo": "^1.2.5",
