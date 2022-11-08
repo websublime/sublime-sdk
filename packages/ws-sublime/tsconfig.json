@@ -7,7 +7,7 @@
       "importHelpers": true,
       "inlineSources": true,
       "isolatedModules": true,
-      "lib": ["esnext", "dom", "dom.iterable"],
+      "lib": ["es2017", "dom", "dom.iterable"],
       "module": "esNext",
       "moduleResolution": "node",
       "noImplicitReturns": true,
@@ -18,11 +18,11 @@
       "skipLibCheck": true,
       "strict": true,
       "sourceMap": true,
-      "target": "esnext",
+      "target": "es2017",
       "baseUrl": ".",
       "paths": {
         "*": ["./types/*", "*"],
-        "@websublime/ws-essential/*": ["./src/*"]
+        "@websublime/ws-sublime/*": ["./src/*"]
       },
       "declarationDir": "./declarations",
       "removeComments": false,
@@ -31,7 +31,6 @@
     },
     "buildOptions": {"force": true},
     "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "types/**/*.d.ts"],
-    "exclude": ["tmp/**", "src/**/*.spec.ts"],
     "extends": "../../tsconfig.base.json",
     "references": [
       {

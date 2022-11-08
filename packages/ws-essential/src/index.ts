@@ -19,7 +19,6 @@ declare global {
 
   interface Window {
     essential: EssentialStoreObject;
-    __REDUX_DEVTOOLS_EXTENSION_LOCKED__: boolean;
   }
 }
 
