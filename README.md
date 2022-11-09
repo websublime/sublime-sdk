@@ -12,7 +12,7 @@
   <img style="display: inline; margin: 0 6px" alt="OSS" src="https://forthebadge.com/images/badges/open-source.svg">
 </p>
 
-Your project description in here.
+Sublime SDk is a collection of packages to create all sublime packages platform.
 
 # Table of contents
 

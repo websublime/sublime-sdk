@@ -20,15 +20,17 @@ import {
 
 async function drivers() {
   const localStorageDriver = await import(
-    'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/localstorage.js'
+    'https://cdn.skypack.dev/unstorage/drivers/localstorage'
   );
   const memoryDriver = await import(
-    'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/memory.js'
+    'https://cdn.skypack.dev/unstorage/drivers/memory'
   );
 
   return {
-    localStorageDriver: localStorageDriver.default,
-    memoryDriver: memoryDriver.default
+    localStorageDriver: localStorageDriver.default as (
+      ...arguments_: any
+    ) => any,
+    memoryDriver: memoryDriver.default as (...arguments_: any) => any
   };
 }
 

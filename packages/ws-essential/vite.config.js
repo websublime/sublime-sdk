@@ -3,6 +3,7 @@
 import path from 'node:path';
 
 import replace from '@rollup/plugin-replace';
+import { rollupImportMapPlugin } from '@websublime/import-map';
 //import { workspacesAlias } from '@websublime/vite';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
@@ -34,12 +35,7 @@ module.exports = defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: [
-        '@reduxjs/toolkit',
-        'unstorage',
-        'unstorage/drivers/localstorage',
-        'unstorage/drivers/memory'
-      ],
+      external: [],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
@@ -71,22 +67,39 @@ module.exports = defineConfig({
     }),
     postcss({
       inject: false
+    }),
+    rollupImportMapPlugin({
+      imports: {
+        '@reduxjs/toolkit': 'https://cdn.skypack.dev/@reduxjs/toolkit',
+        unstorage: 'https://cdn.skypack.dev/unstorage',
+        'unstorage/drivers/localstorage':
+          'https://cdn.skypack.dev/unstorage/drivers/localstorage',
+        'unstorage/drivers/memory':
+          'https://cdn.skypack.dev/unstorage/drivers/memory',
+        '@websublime/ws-sublime':
+          'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js'
+      }
     })
     //workspacesAlias(['../../'], ['vite'])
   ],
   resolve: {
     alias: {
-      '@reduxjs/toolkit':
-        'https://esm.sh/v96/@reduxjs/toolkit@1.8.5/es2022/toolkit.js',
-      unstorage: 'https://esm.sh/v94/unstorage@0.5.6/es2022/unstorage.js'
+      '@reduxjs/toolkit': 'https://cdn.skypack.dev/@reduxjs/toolkit',
+      unstorage: 'https://cdn.skypack.dev/unstorage',
+      'unstorage/drivers/localstorage':
+        'https://cdn.skypack.dev/unstorage/drivers/localstorage',
+      'unstorage/drivers/memory':
+        'https://cdn.skypack.dev/unstorage/drivers/memory',
+      '@websublime/ws-sublime':
+        'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js'
     }
   },
   optimizeDeps: {
     exclude: [
       '@reduxjs/toolkit',
       'unstorage',
-      'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/localstorage.js',
-      'https://esm.sh/v96/unstorage@0.5.6/es2022/drivers/memory.js'
+      'unstorage/drivers/localstorage',
+      'unstorage/drivers/memory'
     ],
     include: ['redux']
   }

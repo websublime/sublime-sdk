@@ -19,6 +19,10 @@
    "name": "@websublime/vite"
   },
   {
+   "path": "./libs/import-map",
+   "name": "@websublime/import-map"
+  },
+  {
    "path": "packages/ws-essential",
    "name": "@websublime/ws-essential"
   },
