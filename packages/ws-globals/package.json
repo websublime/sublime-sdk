@@ -37,7 +37,9 @@
     "vite": "^3.0.2"
   },
   "dependencies": {
-    "lit": "^2.2.1"
+    "lit": "^2.2.1",
+    "@websublime/ws-essential": "0.4.2",
+    "@websublime/ws-sublime": "0.1.0"
   },
   "main": "./dist/ws-globals.cjs.js",
   "module": "./dist/ws-globals.es.js",

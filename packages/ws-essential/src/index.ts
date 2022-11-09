@@ -5,30 +5,24 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 import { ConfigureStoreOptions } from '@reduxjs/toolkit';
+import { createPluginID, useSublime } from '@websublime/ws-sublime';
 
-import { isSsr } from './helpers';
 import { EssentialStore } from './store';
 import { version } from './version';
 
-declare global {
+declare module '@websublime/ws-sublime' {
   interface EssentialStoreObject {
     store: EssentialStore;
     isStoreAvailable: () => boolean;
     version: string;
   }
 
-  interface Window {
+  interface SublimeContext {
     essential: EssentialStoreObject;
   }
 }
 
-const context: { essential: EssentialStoreObject } = isSsr()
-  ? ({} as any)
-  : window.top || window;
-
-const isStoreAvailable = () => {
-  return !!context.essential.store;
-};
+export const EssentialSublimePlugin = createPluginID('EssentialSublimePlugin');
 
 /**
  * It shares the same instance (singleton) of our store.
@@ -36,6 +30,9 @@ const isStoreAvailable = () => {
  * @public
  */
 export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
+  const context = useSublime();
+  const isStoreAvailable = () => context.has(EssentialSublimePlugin);
+
   if (!context.essential) {
     const environment = process.env.NODE_ENV || 'production';
 
@@ -44,10 +41,14 @@ export const useStore = (storeOptions: Partial<ConfigureStoreOptions> = {}) => {
       ...storeOptions
     };
 
-    context.essential = Object.seal({
-      isStoreAvailable: isStoreAvailable,
-      store: new EssentialStore(options),
-      version
+    context.plugin(EssentialSublimePlugin, {
+      install() {
+        this.essential = Object.seal({
+          isStoreAvailable: isStoreAvailable,
+          store: new EssentialStore(options),
+          version
+        });
+      }
     });
   }
 

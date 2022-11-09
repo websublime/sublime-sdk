@@ -36,6 +36,9 @@
     "references": [
       {
         "path": "../../libs/vite"
+      },
+      {
+        "path": "../ws-sublime"
       }
     ]
   }

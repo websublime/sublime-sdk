@@ -5,6 +5,7 @@
  * found in the LICENSE file at https://websublime.dev/license
  */
 import { useStore } from '@websublime/ws-essential';
+import { useSublime } from '@websublime/ws-sublime';
 
 import {
   EnvironmentDispatchers,
@@ -18,19 +19,15 @@ type Environment = {
   env: string;
 };
 
-declare global {
-  var environment: Environment;
-}
+const initializeEnvironment = async () => {
+  const context = useSublime();
 
-const initializeEnvironment = async (environment: Environment) => {
-  // eslint-disable-next-line unicorn/prevent-abbreviations
-  const { apiUrl, env = 'production' } = {
-    ...globalThis.environment,
-    ...environment
-  };
+  const environment: Environment = context.has('environment')
+    ? context.get('environment')
+    : { apiUrl: 'http://localhost', env: 'production' };
 
   const store = useStore({
-    devTools: env !== 'production'
+    devTools: environment.env !== 'production'
   });
 
   await store.addLink(new EnvironmentLink(EnvironmentLinkID));
@@ -38,7 +35,7 @@ const initializeEnvironment = async (environment: Environment) => {
   const { add } =
     store.getDispatchers<EnvironmentDispatchers>(EnvironmentLinkID);
 
-  return add({ api: apiUrl, env });
+  return add({ api: environment.apiUrl, env: environment.env });
 };
 
 const initializeRegistry = async () => {
@@ -50,7 +47,13 @@ const initializeRegistry = async () => {
 export const bootGlobals = async (
   environment: Environment = {} as Environment
 ) => {
-  return initializeEnvironment(environment).then(() => initializeRegistry());
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  const { apiUrl = 'http://localhost', env = 'production' } = environment;
+  const context = useSublime();
+
+  context.set('environment', { apiUrl, env });
+
+  return initializeEnvironment().then(() => initializeRegistry());
 };
 
 export { RegistryLinkID } from './registry';
