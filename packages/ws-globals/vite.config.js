@@ -32,6 +32,7 @@ module.exports = defineConfig({
       // into your library
       external: [
         '@websublime/ws-essential',
+        '@websublime/ws-sublime',
         'unstorage',
         'unstorage/drivers/localstorage',
         'unstorage/drivers/memory'
@@ -72,7 +73,10 @@ module.exports = defineConfig({
       '@reduxjs/toolkit':
         'https://esm.sh/v96/@reduxjs/toolkit@1.8.5/es2022/toolkit.js',
       unstorage: 'https://esm.sh/v94/unstorage@0.5.6/es2022/unstorage.js',
-      '@websublime/ws-essential': 'https://cdn.websublime.dev/g/@websublime/ws-essential@0.4.1/dist/ws-essential.es.js'
+      '@websublime/ws-sublime':
+        'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js',
+      '@websublime/ws-essential':
+        'https://cdn.websublime.dev/g/@websublime/ws-essential@0.5.0/dist/ws-essential.es.js'
     }
-  },
+  }
 });
