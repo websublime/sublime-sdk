@@ -18,15 +18,25 @@ Environment: EnvironmentLinkID
 Registry: RegistryLinkID
 ```
 
-They are export on package to be consumed as npm if you need to subscribe. Environment is initiated and search on global scope (window) for the entries in window.environment.
+They are export on package to be consumed as npm if you need to subscribe. Environment is initiated on global scope (Sublime) for the entries:
 
 ```ts
-interface Window {
-  environment: {
-    apiUrl: string;
-    env: string;
-  };
-}
+type Environment = {
+  apiUrl: string;
+  env: string;
+};
+```
+
+Globals are intiated calling the function:
+
+```ts
+import { bootGlobals } from '@websublime/ws-globals';
+
+bootGlobals({
+  apiUrl: 'http://localhost',
+  env: import.meta.env.MODE
+  // or any new things you want on the environment link and sublime context
+});
 ```
 
 Provide this values if you want or defaults will be used.
