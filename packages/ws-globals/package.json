@@ -1,7 +1,7 @@
 {
   "name": "@websublime/ws-globals",
   "private": false,
-  "version": "0.4.0",
+  "version": "0.5.0-SNAPSHOT-ac0dfbd",
   "source": "./src",
   "scripts": {
     "start": "vite --debug",
@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@websublime/vite": "0.0.1",
-    "@websublime/ws-essential": "0.5.0",
+    "@websublime/ws-essential": "0.6.0-SNAPSHOT-ac0dfbd",
     "@microsoft/api-documenter": "^7.17.15",
     "@microsoft/api-extractor": "^7.24.1",
     "@types/jest": "^27.0.1",
@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "lit": "^2.2.1",
-    "@websublime/ws-essential": "0.5.0",
+    "@websublime/ws-essential": "0.6.0-SNAPSHOT-ac0dfbd",
     "@websublime/ws-sublime": "0.1.1"
   },
   "main": "./dist/ws-globals.cjs.js",

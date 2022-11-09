@@ -1,5 +1,16 @@
 # @websublime/ws-globals
 
+## 0.5.0-SNAPSHOT-ac0dfbd
+
+### Minor Changes
+
+- [`ac0dfbd`](https://github.com/websublime/sublime-sdk/commit/ac0dfbd7ceb483deccae5c79d0bc0d86452902c6) - Test ESM browser dependency
+
+### Patch Changes
+
+- Updated dependencies [[`ac0dfbd`](https://github.com/websublime/sublime-sdk/commit/ac0dfbd7ceb483deccae5c79d0bc0d86452902c6)]:
+  - @websublime/ws-essential@0.6.0-SNAPSHOT-ac0dfbd
+
 ## 0.4.0
 
 ### Minor Changes
