@@ -39,6 +39,9 @@
       },
       {
         "path": "../ws-essential"
+      },
+      {
+        "path": "../ws-sublime"
       }
     ]
   }
