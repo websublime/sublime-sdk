@@ -1,5 +1,11 @@
 # @websublime/ws-essential
 
+## 0.6.0-SNAPSHOT-8a1a9be
+
+### Minor Changes
+
+- [`ac0dfbd`](https://github.com/websublime/sublime-sdk/commit/ac0dfbd7ceb483deccae5c79d0bc0d86452902c6) - Test ESM browser dependency
+
 ## 0.5.0
 
 ### Minor Changes
