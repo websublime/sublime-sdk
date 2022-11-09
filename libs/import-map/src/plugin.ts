@@ -19,14 +19,18 @@ const validate = (map: any, options: any) =>
       throw new Error(`Import specifier can NOT be mapped to a bare import statement. Import specifier "${key}" is being wrongly mapped to "${value}"`);
     }
 
-    if (typeof options.external === 'function' && options.external(key))
+    if (typeof options.external === 'function' && options.external(key)) {
       throw new Error('Import specifier must NOT be present in the Rollup external config. Please remove specifier from the Rollup external config.');
+    }
+       
 
-    if (Array.isArray(options.external) && options.external.includes(key))
+    if (Array.isArray(options.external) && options.external.includes(key)) {
       throw new Error('Import specifier must NOT be present in the Rollup external config. Please remove specifier from the Rollup external config.');
+    }
 
     return { key, value };
-  });
+  }
+);
 
 const fileReader = (pathname = '', options = {}) =>
   new Promise((resolve, reject) => {
@@ -50,7 +54,31 @@ export function rollupImportMapPlugin(importMaps = []) {
 
   return {
     name: 'vite-plugin-import-map',
+    config: (userConfig: Record<string, any>) => {
+      const { alias = {} } = userConfig.resolve || {};
+      const imports: Record<string, string> = {};
 
+      maps.forEach((item: any) => {
+        Object.entries<string>(item.imports).forEach(([key, value]) => {
+          Object.defineProperty(imports, key, {
+            value,
+            enumerable: true
+          });
+        });
+      });
+
+      const modifiedConfig = {
+        ...userConfig,
+        resolve: {
+          alias: {
+            ...alias,
+            ...imports
+          }
+        }
+      };
+
+      return modifiedConfig
+    },
     async buildStart(options: any) {
       const mappings = maps.map(item => {
         if (isString(item)) {

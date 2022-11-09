@@ -82,18 +82,6 @@ module.exports = defineConfig({
     })
     //workspacesAlias(['../../'], ['vite'])
   ],
-  resolve: {
-    alias: {
-      '@reduxjs/toolkit': 'https://cdn.skypack.dev/@reduxjs/toolkit',
-      unstorage: 'https://cdn.skypack.dev/unstorage',
-      'unstorage/drivers/localstorage':
-        'https://cdn.skypack.dev/unstorage/drivers/localstorage',
-      'unstorage/drivers/memory':
-        'https://cdn.skypack.dev/unstorage/drivers/memory',
-      '@websublime/ws-sublime':
-        'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js'
-    }
-  },
   optimizeDeps: {
     exclude: [
       '@reduxjs/toolkit',

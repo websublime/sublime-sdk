@@ -38,10 +38,7 @@
         "path": "../../libs/vite"
       },
       {
-        "path": "../ws-essential"
-      },
-      {
-        "path": "../ws-sublime"
+        "path": "../../libs/import-map"
       }
     ]
   }

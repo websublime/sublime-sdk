@@ -3,7 +3,7 @@
 import path from 'node:path';
 
 import replace from '@rollup/plugin-replace';
-//import { workspacesAlias } from '@websublime/vite';
+import { rollupImportMapPlugin } from '@websublime/import-map';
 import postcss from 'rollup-plugin-postcss';
 import { defineConfig } from 'vite';
 
@@ -30,13 +30,7 @@ module.exports = defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: [
-        '@websublime/ws-essential',
-        '@websublime/ws-sublime',
-        'unstorage',
-        'unstorage/drivers/localstorage',
-        'unstorage/drivers/memory'
-      ],
+      external: [],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
@@ -65,18 +59,14 @@ module.exports = defineConfig({
     }),
     postcss({
       inject: false
+    }),
+    rollupImportMapPlugin({
+      imports: {
+        '@websublime/ws-essential':
+        'https://cdn.websublime.dev/g/@websublime/ws-essential@0.6.0-SNAPSHOT-8a1a9be/dist/ws-essential.es.js',
+        '@websublime/ws-sublime':
+          'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js'
+      }
     })
-    //workspacesAlias(['../../'], ['vite', '@websublime/ws-essential'])
-  ],
-  resolve: {
-    alias: {
-      '@reduxjs/toolkit':
-        'https://esm.sh/v96/@reduxjs/toolkit@1.8.5/es2022/toolkit.js',
-      unstorage: 'https://esm.sh/v94/unstorage@0.5.6/es2022/unstorage.js',
-      '@websublime/ws-sublime':
-        'https://cdn.websublime.dev/g/@websublime/ws-sublime@0.1.1/dist/ws-sublime.es.js',
-      '@websublime/ws-essential':
-        'https://cdn.websublime.dev/g/@websublime/ws-essential@0.5.0/dist/ws-essential.es.js'
-    }
-  }
+  ]
 });
