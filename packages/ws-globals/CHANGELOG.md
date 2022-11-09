@@ -1,5 +1,17 @@
 # @websublime/ws-globals
 
+## 0.4.0
+
+### Minor Changes
+
+- [#27](https://github.com/websublime/sublime-sdk/pull/27) [`16125ac`](https://github.com/websublime/sublime-sdk/commit/16125acc9b3a36e5668a403a76cd3df67171b2a1) Thanks [@miguelramos](https://github.com/miguelramos)! - Packages ws-essential and ws-globals will now use Sublime context as global entry point. Sublime context documented
+
+### Patch Changes
+
+- Updated dependencies [[`16125ac`](https://github.com/websublime/sublime-sdk/commit/16125acc9b3a36e5668a403a76cd3df67171b2a1)]:
+  - @websublime/ws-essential@0.5.0
+  - @websublime/ws-sublime@0.1.1
+
 ## 0.3.1
 
 ### Patch Changes
